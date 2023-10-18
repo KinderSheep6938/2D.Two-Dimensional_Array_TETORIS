@@ -13,12 +13,18 @@ public class FieldManager : MonoBehaviour, IFieldCtrl
     #region 変数
     //リスト管理定数
     const int FIELD_MAX_WIDTH = 10; //フィールドの横幅
-    const int FIELD_MAX_HEIGHT = 20; //フィールドの縦幅
+    const int FIELD_MAX_HEIGHT = 25; //フィールドの縦幅
+    const int FIELD_VIEW_HEIGHT = 20; //フィールドの最大表示縦幅
     const int TILE_NONE_ID = 0; //フィールドの空白ID
     const int TILE_MINO_ID = 1; //ミノID
 
-    private int[,] _field = new int[FIELD_MAX_HEIGHT,FIELD_MAX_WIDTH]; //フィールド保存 [縦軸:y,横軸:x]
+    [SerializeField]
+    private GameObject _fieldTileObj = default; //空白タイル
 
+    private int[,] _field = new int[FIELD_MAX_HEIGHT,FIELD_MAX_WIDTH]; //フィールド保存 [縦軸:y,横軸:x]
+    private bool[] _lines = new bool[FIELD_MAX_HEIGHT]; //フィールドのライン検査リスト [縦軸:y]
+
+    private Transform _myTrans = default;
     #endregion
 
     #region メソッド
@@ -27,14 +33,31 @@ public class FieldManager : MonoBehaviour, IFieldCtrl
     /// </summary>
     void Awake()
     {
+        //変数初期化
+        _myTrans = transform;
+
         //マップ初期化
         for(int y = 0; y < FIELD_MAX_HEIGHT; y++) //縦軸
-        { 
+        {
             for(int x = 0; x < FIELD_MAX_WIDTH; x++) //横軸
             { 
                 //空白で初期化
                 _field[y, x] = TILE_NONE_ID;
+                //空白タイル設置
+                if(y < FIELD_VIEW_HEIGHT)
+                {
+                    //空白タイル,生成位置,角度,管理用オブジェ
+                    Instantiate(
+                        _fieldTileObj,
+                        Vector3.right * x + Vector3.up * y,
+                        Quaternion.identity,
+                        _myTrans
+                        );
+                }
             }
+            //ライン検査初期化
+            _lines[y] = false;
+
         }
     }
 
@@ -52,6 +75,24 @@ public class FieldManager : MonoBehaviour, IFieldCtrl
     void Update()
     {
         
+    }
+
+    /// <summary>
+    /// <para>CheckLine</para>
+    /// <para>フィールドの中でラインができているか検査します</para>
+    /// </summary>
+    private void CheckLine()
+    {
+        //ライン調査   
+    }
+
+    /// <summary>
+    /// <para>DeleteLine</para>
+    /// <para>指定したラインを削除します</para>
+    /// </summary>
+    private void DeleteLine()
+    {
+        //ライン消去
     }
     
     /// <summary>

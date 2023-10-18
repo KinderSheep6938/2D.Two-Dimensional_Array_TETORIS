@@ -10,8 +10,9 @@ using UnityEngine;
 
 public interface IMinoInfo
 {
-    int MinoX { get; set; }
-    int MinoY { get; set; }
+    int MinoX { get; }
+    int MinoY { get; }
 
     void ChangeColor(Color minoColor);
+    void SetMinoPos(float x, float y, Transform parent);
 }

@@ -11,8 +11,6 @@ using UnityEngine;
 public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
 {
     #region 変数
-    private int _minoX = 0; //X座標
-    private int _minoY = 0; //Y座標
     private bool _isCommit = false;
 
     private SpriteRenderer _myRen = default;
@@ -20,8 +18,8 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     #endregion
 
     #region プロパティ
-    public int MinoX { get => _minoX; set => _minoX = value; }
-    public int MinoY { get => _minoY; set => _minoY = value; }
+    public int MinoX { get => (int)_myTrans.position.x; }
+    public int MinoY { get => (int)_myTrans.position.y; }
     
     #endregion
 
@@ -59,6 +57,22 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     {
         _myRen.color = minoColor;
         return;
+    }
+
+    /// <summary>
+    /// <para>SetMinoPos</para>
+    /// <para>ミノブロックを指定した値分移動します</para>
+    /// <para>また、指定したTransformを親（ミノ軸）として設定します</para>
+    /// </summary>
+    /// <param name="x">移動する横軸</param>
+    /// <param name="y">移動する縦軸</param>
+    /// <param name="parent">ミノ軸</param>
+    public void SetMinoPos(float x, float y, Transform parent)
+    {
+        //軸を中心に座標調整
+        _myTrans.position = parent.position + Vector3.right * x + Vector3.up * y;
+        //軸を親に設定
+        _myTrans.parent = parent;
     }
 
     /// <summary>
