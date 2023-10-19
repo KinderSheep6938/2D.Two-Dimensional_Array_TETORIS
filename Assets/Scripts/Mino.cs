@@ -11,8 +11,9 @@ using UnityEngine;
 public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
 {
     #region 変数
-    private bool _isCommit = false;
+    const string OBJECTPOOL_SYSTEM_TAG = "ObjectPool";
 
+    private MinoPoolManager minoManager = default;
     private SpriteRenderer _myRen = default;
     private Transform _myTrans = default;
     #endregion
@@ -29,7 +30,10 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     /// </summary>
     void Awake()
     {
-
+        //初期化
+        minoManager = GameObject.FindGameObjectWithTag(OBJECTPOOL_SYSTEM_TAG).GetComponent<MinoPoolManager>();
+        _myTrans = transform;
+        _myRen = GetComponent<SpriteRenderer>();
     }
 
     /// <summary>
@@ -48,25 +52,14 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
 
     }
 
-    /// <summary>
-    /// <para>ChangeColor</para>
-    /// <para>ミノの色を設定します</para>
-    /// </summary>
-    /// <param name="minoColor">設定される色</param>
+    //インターフェイス継承
     public void ChangeColor(Color minoColor)
     {
         _myRen.color = minoColor;
         return;
     }
 
-    /// <summary>
-    /// <para>SetMinoPos</para>
-    /// <para>ミノブロックを指定した値分移動します</para>
-    /// <para>また、指定したTransformを親（ミノ軸）として設定します</para>
-    /// </summary>
-    /// <param name="x">移動する横軸</param>
-    /// <param name="y">移動する縦軸</param>
-    /// <param name="parent">ミノ軸</param>
+    //インターフェイス継承
     public void SetMinoPos(float x, float y, Transform parent)
     {
         //軸を中心に座標調整
@@ -75,23 +68,24 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
         _myTrans.parent = parent;
     }
 
-    /// <summary>
-    /// <para>DownMino</para>
-    /// <para>ミノを1列分下げます</para>
-    /// </summary>
+    //インターフェイス継承
+    public void DisConnectParent()
+    {
+        //親子関係削除
+        _myTrans.parent = null;
+    }
+
+    //インターフェイス継承
     public void DownMino()
     {
         _myTrans.position += Vector3.down;
         return;
     }
 
-    /// <summary>
-    /// <para>DeleteMino</para>
-    /// <para>ミノを削除します</para>
-    /// </summary>
+    //インターフェイス継承
     public void DeleteMino()
     {
-        //ミノ削除処理
+        minoManager.EndUseableMino(gameObject);
         return;
     }
     #endregion

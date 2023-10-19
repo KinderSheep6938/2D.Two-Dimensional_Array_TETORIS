@@ -21,6 +21,17 @@ public interface IMinoCreatable
         minoI
     }
     MinoType MyModel { get; set; }
+
+    /// <summary>
+    /// <para>CreateMinoUnit</para>
+    /// <para>指定されたミノ形にミノブロックを設定します</para>
+    /// </summary>
+    /// <param name="setModel">変形するミノ形</param>
     void CreateMinoUnit(IMinoInfo[] minoBlocks,MinoType setModel);
+
+    /// <summary>
+    /// <para>SetUnionPlayable</para>
+    /// <para>ミノユニットを操作可能にします</para>
+    /// </summary>
     void SetUnionPlayable();
 }
