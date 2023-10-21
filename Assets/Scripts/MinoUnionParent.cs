@@ -29,9 +29,10 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
     const int DIRE_RIGHT_ID = 1; //左向きID
     const int DIRE_LEFT_ID = -1; //左向きID
     const float ROTATE_VALUE = 90f; //回転処理の回転角度
-    const float FALL_TIME = 1f; //落下時間
+    const float FALL_TIME = 0.5f; //落下時間
     const string FIELD_MANAGER_TAG = "FieldManager"; //フィールド管理システムのObjectTag
-
+    
+    private Vector3 _createStartPos = default; //ミノスタート位置
     private int _nowAngle = 0; //現在のミノの向き
     private int _moveDire = 0; //回転方向
     private bool _needReturn = false; //回転巻き戻し判定
@@ -40,8 +41,9 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
     private float _fallTimer = 0; //落下計測タイマー
     private Color _unionColor = default; //ミノ色
     private IMinoCreatable.MinoType _myModel = default; //ミノ形
-    private IFieldCtrl _fieldCtrl = default;
-    private Transform _myTrans = default;
+
+    private IFieldCtrl _fieldCtrl = default; //フィールド管理システムのインターフェイス
+    private Transform _myTrans = default; //自身のTransform
     #endregion
 
     #region プロパティ
@@ -56,6 +58,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
     {
         //初期化
         _myTrans = transform;
+        _createStartPos = _myTrans.position;
         _fieldCtrl = GameObject.FindGameObjectWithTag(FIELD_MANAGER_TAG).GetComponent<IFieldCtrl>();
     }
 
@@ -72,7 +75,10 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
     /// </summary>
     void Update()
     {
+        if (_myTrans.childCount == 0) { return; }
 
+        //時間経過落下
+        FallMino();
     }
 
     // インターフェイス継承
@@ -88,7 +94,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
     public void Rotate(int angle)
     {
         //回転反映
-        _myTrans.eulerAngles += Vector3.forward * ROTATE_VALUE * angle;
+        _myTrans.eulerAngles -= Vector3.forward * ROTATE_VALUE * angle;
 
         _nowAngle = (int)(_myTrans.eulerAngles.z / ROTATE_VALUE); //向き取得
         _moveDire = angle; //回転方向取得
@@ -99,6 +105,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
         //衝突判定があった場合はスーパーローテーションシステムを実行する
         if (CheckMino())
         {
+            Debug.Log("srs");
             if (_myModel == IMinoCreatable.MinoType.minoI) { SRSByFour(); } //サイズが４ｘ４
             SRSByThree(); //サイズが３ｘ３
         }
@@ -106,7 +113,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
         //スパロテができない場合は角度を戻す
         if (_needReturn)
         {
-            _myTrans.eulerAngles += Vector3.forward * ROTATE_VALUE * -angle;
+            _myTrans.eulerAngles -= Vector3.forward * ROTATE_VALUE * -angle;
             _nowAngle = (int)(_myTrans.eulerAngles.z / ROTATE_VALUE); //向き取得
         }
     }
@@ -118,6 +125,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
         //落下時間になったか
         if(FALL_TIME < _fallTimer)
         {
+            _fallTimer = 0;
             //ミノを１マス落下
             _myTrans.position += Vector3.down;
 
@@ -131,6 +139,8 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
                 {
                     //コミット
                     _fieldCtrl.SetMino(mino.MinoX, mino.MinoY);
+                    //親子関係削除
+                    mino.DisConnect();
 
                 }
 
@@ -165,7 +175,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
         {
             case 0: //第１条件 --------------------------------------------------------------------------------------------------------------------------
                 _srsPos.startPos = _myTrans.position; //初期座標保存
-                if (_nowAngle == ANGLE_RIGHT_ID || (_nowAngle != ANGLE_LEFT_ID && _moveDire == DIRE_RIGHT_ID))
+                if (_nowAngle == ANGLE_RIGHT_ID || (_nowAngle == ANGLE_DOWN_ID && _moveDire == DIRE_LEFT_ID) || (_nowAngle == ANGLE_UP_ID && _moveDire == DIRE_RIGHT_ID))
                 {
                     _myTrans.position += Vector3.left;
                     break; //現条件終了
@@ -195,7 +205,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
 
             case 3: //第４条件 --------------------------------------------------------------------------------------------------------------------------
                 //座標継続
-                if (_nowAngle == ANGLE_RIGHT_ID || (_nowAngle != ANGLE_LEFT_ID && _moveDire == DIRE_RIGHT_ID))
+                if (_nowAngle == ANGLE_RIGHT_ID || (_nowAngle == ANGLE_DOWN_ID && _moveDire == DIRE_LEFT_ID) || (_nowAngle == ANGLE_UP_ID && _moveDire == DIRE_RIGHT_ID))
                 {
                     _myTrans.position += Vector3.left;
                     break; //現条件終了
@@ -404,9 +414,14 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
     // インターフェイス継承
     public void CreateMinoUnit(IMinoInfo[] minoBlocks,IMinoCreatable.MinoType setModel)
     {
+        //位置、角度初期化
+        _myTrans.position = _createStartPos;
+        _myTrans.eulerAngles = Vector3.zero;
+
         //ミノブロックを設定
         _minos.Clear();
         _minos.AddRange(minoBlocks);
+
         //指定されたモデルに応じて、ミノブロックの位置と色を設定
         switch (setModel)
         {
@@ -416,6 +431,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
                 _minos[2].SetMinoPos(-EXCEPTION_MINO_0_5_SHIFT, -EXCEPTION_MINO_0_5_SHIFT, _myTrans);
                 _minos[3].SetMinoPos(EXCEPTION_MINO_0_5_SHIFT, -EXCEPTION_MINO_0_5_SHIFT, _myTrans);
                 _unionColor = Color.yellow; //黄色
+                _myTrans.position += Vector3.right * EXCEPTION_MINO_0_5_SHIFT + Vector3.up * EXCEPTION_MINO_0_5_SHIFT; //Oミノの初期設定
                 break;
             case IMinoCreatable.MinoType.minoS: //Sミノ
                 _minos[0].SetMinoPos(0,0, _myTrans);
@@ -458,6 +474,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
                 _minos[2].SetMinoPos(-EXCEPTION_MINO_0_5_SHIFT, EXCEPTION_MINO_0_5_SHIFT, _myTrans);
                 _minos[3].SetMinoPos(-EXCEPTION_MINO_1_5_SHIFT, EXCEPTION_MINO_0_5_SHIFT, _myTrans);
                 _unionColor = Color.blue + Color.white / 2; //水色
+                _myTrans.position += Vector3.right * EXCEPTION_MINO_0_5_SHIFT + Vector3.down * EXCEPTION_MINO_0_5_SHIFT; //Iミノの初期設定
                 break;
             default: 
                 //例外処理

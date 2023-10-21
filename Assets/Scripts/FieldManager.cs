@@ -14,7 +14,7 @@ public class FieldManager : MonoBehaviour, IFieldCtrl
     //リスト管理定数
     const int FIELD_MAX_WIDTH = 10; //フィールドの横幅
     const int FIELD_MAX_HEIGHT = 25; //フィールドの縦幅
-    const int FIELD_VIEW_HEIGHT = 20; //フィールドの最大表示縦幅
+    const int FIELD_VIEW_HEIGHT = 21; //フィールドの最大表示縦幅
     const int TILE_NONE_ID = 0; //フィールドの空白ID
     const int TILE_MINO_ID = 1; //ミノID
 

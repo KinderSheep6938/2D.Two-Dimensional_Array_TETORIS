@@ -19,8 +19,8 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     #endregion
 
     #region プロパティ
-    public int MinoX { get => (int)_myTrans.position.x; }
-    public int MinoY { get => (int)_myTrans.position.y; }
+    public int MinoX { get => Mathf.RoundToInt(_myTrans.position.x); }
+    public int MinoY { get => Mathf.RoundToInt(_myTrans.position.y); }
     
     #endregion
 
@@ -69,10 +69,14 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     }
 
     //インターフェイス継承
-    public void DisConnectParent()
+    public void DisConnect()
     {
         //親子関係削除
         _myTrans.parent = null;
+        //座標正規化
+        _myTrans.position =
+            Vector3.right * Mathf.RoundToInt(_myTrans.position.x) +
+            Vector3.up * Mathf.RoundToInt(_myTrans.position.y);
     }
 
     //インターフェイス継承

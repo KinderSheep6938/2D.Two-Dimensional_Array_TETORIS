@@ -34,5 +34,5 @@ public interface IMinoInfo
     /// <para>DisConnectParent</para>
     /// <para>ƒ~ƒm²‚Æ‚ÌÚ‘±‚ğØ’f‚µ‚Ü‚·</para>
     /// </summary>
-    void DisConnectParent();
+    void DisConnect();
 }
