@@ -11,7 +11,7 @@ using UnityEngine;
 public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
 {
     #region 変数
-    const string OBJECTPOOL_SYSTEM_TAG = "ObjectPool";
+    private int _deleteLineIndex = default;
 
     private MinoPoolManager minoManager = default;
     private SpriteRenderer _myRen = default;
@@ -31,7 +31,7 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     void Awake()
     {
         //初期化
-        minoManager = GameObject.FindGameObjectWithTag(OBJECTPOOL_SYSTEM_TAG).GetComponent<MinoPoolManager>();
+        minoManager = FindObjectOfType<MinoPoolManager>().GetComponent<MinoPoolManager>();
         _myTrans = transform;
         _myRen = GetComponent<SpriteRenderer>();
     }
@@ -49,7 +49,8 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     /// </summary>
     void Update()
     {
-
+        //向き初期化
+        if(_myTrans.eulerAngles.z != 0) { _myTrans.eulerAngles = Vector3.zero; }
     }
 
     //インターフェイス継承
@@ -80,14 +81,56 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     }
 
     //インターフェイス継承
-    public void DownMino()
+    public void LineCtrl(List<int> deleteLineHeights)
     {
-        _myTrans.position += Vector3.down;
+        //削除対象のラインにある場合、削除する
+        if (deleteLineHeights.Contains(MinoY)) { DeleteMino(); }
+
+        //削除対象のラインに応じて、落下処理を行います
+        for (_deleteLineIndex = 0; _deleteLineIndex < deleteLineHeights.Count; _deleteLineIndex++)
+        {
+            //現在の落下対象ライン以下 かつ １番下層のラインである
+            if(MinoY <= deleteLineHeights[_deleteLineIndex] && _deleteLineIndex == 0)
+            {
+                //何もしない
+                return;
+            }
+
+            //現在の落下対象ライン以下である（１番下層のラインではない）
+            if(MinoY <= deleteLineHeights[_deleteLineIndex])
+            {
+                DownMino(_deleteLineIndex);
+                return;
+            }
+
+            //現在の落下対象ラインより上
+            if(deleteLineHeights[_deleteLineIndex] < MinoY)
+            {
+                //次の落下対象ラインと比較
+                continue;
+            }
+        }
+        //全ての落下対象ラインより上にある
+        DownMino(_deleteLineIndex);
         return;
     }
 
-    //インターフェイス継承
-    public void DeleteMino()
+    /// <summary>
+    /// <para>DownMino</para>
+    /// <para>ミノを落下させます</para>
+    /// </summary>
+    /// <param name="value">落下距離</param>
+    private void DownMino(int value)
+    {
+        _myTrans.position += Vector3.down * value;
+        return;
+    }
+
+    /// <summary>
+    /// <para>DeleteMino</para>
+    /// <para>ミノを削除します</para>
+    /// </summary>
+    private void DeleteMino()
     {
         minoManager.EndUseableMino(gameObject);
         return;

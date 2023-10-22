@@ -53,6 +53,7 @@ public class PlayerInput : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D)) { _minoUnion.Move(1); }
         if (Input.GetKeyDown(KeyCode.Q)) { _minoUnion.Rotate(-1); }
         if (Input.GetKeyDown(KeyCode.E)) { _minoUnion.Rotate(1); }
+        if (Input.GetKeyDown(KeyCode.S)) { _minoUnion.HardDrop(); }
     }
     #endregion
 }

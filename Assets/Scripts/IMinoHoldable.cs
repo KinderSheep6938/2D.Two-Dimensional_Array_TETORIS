@@ -1,19 +1,18 @@
 // -------------------------------------------------------------------------------
-// ILineMinoCtrl.Interface
+// IMinoHoldable.Interface
 //
-// 作成日: 2023/10/17
+// 作成日: 2023/10/22
 // 作成者: Shizuku
 // -------------------------------------------------------------------------------
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface ILineMinoCtrl
+public interface IMinoHoldable
 {
     /// <summary>
-    /// <para>LineCtrl</para>
-    /// <para>削除対象のラインに応じて、削除処理・落下処理を行います</para>
+    /// <para>Hold</para>
+    /// <para>ミノを保持します</para>
     /// </summary>
-    /// <param name="deleteLineHeights">削除対処のラインのリスト</param>
-    void LineCtrl(List<int> deleteLineHeights);
+    void Hold();
 }

@@ -12,7 +12,7 @@ using UnityEngine;
 public class MinoFactory : MonoBehaviour
 {
     #region 変数
-    const string PLAYABLE_UNIONMINO_TAG = "PlayableMino"; //ミノ制御システムのObjectTag
+    const string PLAYABLE_MINOCTRL_TAG = "PlayableMino";
 
     private IMinoCreatable _minoCreator = default; //ミノの形生成インターフェイス
     private MinoPoolManager _minoManager = default; //ミノブロックのオブジェクトプール
@@ -29,7 +29,7 @@ public class MinoFactory : MonoBehaviour
         IMinoCreatable.MinoType.minoI
     };
     //生成可能なミノ形を保存するリスト
-    private List<IMinoCreatable.MinoType> _canCreateModels = new List<IMinoCreatable.MinoType>();
+    private List<IMinoCreatable.MinoType> _canCreateModels = new();
     private int _createModelIndex = 0; //生成するミノ形のインデックス
     #endregion
 
@@ -44,7 +44,7 @@ public class MinoFactory : MonoBehaviour
     void Awake()
     {
         //初期化
-        _minoCreator = GameObject.FindGameObjectWithTag(PLAYABLE_UNIONMINO_TAG).GetComponent<IMinoCreatable>();
+        _minoCreator = GameObject.FindGameObjectWithTag(PLAYABLE_MINOCTRL_TAG).GetComponent<IMinoCreatable>();
         _minoManager = GetComponent<MinoPoolManager>();
         _canCreateModels.Clear();
         _canCreateModels.AddRange(_InitializeModels);
@@ -69,7 +69,11 @@ public class MinoFactory : MonoBehaviour
         }
     }
 
-    void CreateMino()
+    /// <summary>
+    /// <para>CreateMino</para>
+    /// <para>ミノを生成します</para>
+    /// </summary>
+    public void CreateMino()
     {
         //生成可能なミノ形が存在しない
         if(_canCreateModels.Count == 0)
@@ -80,7 +84,7 @@ public class MinoFactory : MonoBehaviour
         }
         //生成可能なミノ形のIndexを設定
         _createModelIndex = Random.Range(0, _canCreateModels.Count);
-        //ミノ生成
+        //ミノ生成　引数：使用可能なミノブロック,生成するミノ形
         _minoCreator.CreateMinoUnit(_minoManager.GetUseableMino(), _canCreateModels[_createModelIndex]);
         //生成したミノ形をリストから除外
         _canCreateModels.RemoveAt(_createModelIndex);

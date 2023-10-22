@@ -23,4 +23,10 @@ public interface IMinoUnionCtrl
     /// </summary>
     /// <param name="angle">‰ñ“]•ûŒü</param>
     void Rotate(int angle);
+
+    /// <summary>
+    /// <para>HardDrop</para>
+    /// <para>ƒ~ƒm‚ğ‹}~‰º‚³‚¹‚Ü‚·</para>
+    /// </summary>
+    void HardDrop();
 }

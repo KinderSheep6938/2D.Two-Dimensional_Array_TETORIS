@@ -28,10 +28,4 @@ public interface IMinoCreatable
     /// </summary>
     /// <param name="setModel">変形するミノ形</param>
     void CreateMinoUnit(IMinoInfo[] minoBlocks,MinoType setModel);
-
-    /// <summary>
-    /// <para>SetUnionPlayable</para>
-    /// <para>ミノユニットを操作可能にします</para>
-    /// </summary>
-    void SetUnionPlayable();
 }

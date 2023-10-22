@@ -35,7 +35,7 @@ public class GameCtrlManager : MonoBehaviour
     /// </summary>
     void Start()
     {
-
+        _factorySystem.CreateMino();
     }
 
     /// <summary>
@@ -43,7 +43,11 @@ public class GameCtrlManager : MonoBehaviour
     /// </summary>
     void Update()
     {
-
+        //‘€ì’†‚©
+        if (!_fieldSystem.GetCommitStatus()) { return; /*‘€ì’†*/ }
+        
+        //‘€ì‚ªI—¹‚µ‚Ä‚¢‚é
+        _factorySystem.CreateMino(); //ƒ~ƒm¶¬
     }
     #endregion
 }

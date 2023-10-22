@@ -17,7 +17,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
         public Vector3 firstSRSPos;
         public Vector3 secondSRSPos;
     }
-    private SRSPosSave _srsPos = new SRSPosSave();
+    private SRSPosSave _srsPos = new();
 
     const float EXCEPTION_MINO_0_5_SHIFT = 0.5f; //ミノ形生成用0.5差分
     const float EXCEPTION_MINO_1_0_SHIFT = 1.0f; //ミノ形生成用1.0差分
@@ -30,14 +30,13 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
     const int DIRE_LEFT_ID = -1; //左向きID
     const float ROTATE_VALUE = 90f; //回転処理の回転角度
     const float FALL_TIME = 0.5f; //落下時間
-    const string FIELD_MANAGER_TAG = "FieldManager"; //フィールド管理システムのObjectTag
     
     private Vector3 _createStartPos = default; //ミノスタート位置
     private int _nowAngle = 0; //現在のミノの向き
     private int _moveDire = 0; //回転方向
     private bool _needReturn = false; //回転巻き戻し判定
     private int _srsCnt = 0; //スパロテの回数
-    private List<IMinoInfo> _minos = new List<IMinoInfo>(); //ミノブロック管理リスト
+    private List<IMinoInfo> _minos = new(); //ミノブロック管理リスト
     private float _fallTimer = 0; //落下計測タイマー
     private Color _unionColor = default; //ミノ色
     private IMinoCreatable.MinoType _myModel = default; //ミノ形
@@ -47,6 +46,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
     #endregion
 
     #region プロパティ
+
     public IMinoCreatable.MinoType MyModel { get => _myModel; set => _myModel = value; }
     #endregion
 
@@ -59,7 +59,7 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
         //初期化
         _myTrans = transform;
         _createStartPos = _myTrans.position;
-        _fieldCtrl = GameObject.FindGameObjectWithTag(FIELD_MANAGER_TAG).GetComponent<IFieldCtrl>();
+        _fieldCtrl = FindObjectOfType<FieldManager>().GetComponent<IFieldCtrl>();
     }
 
     /// <summary>
@@ -116,6 +116,38 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
             _myTrans.eulerAngles -= Vector3.forward * ROTATE_VALUE * -angle;
             _nowAngle = (int)(_myTrans.eulerAngles.z / ROTATE_VALUE); //向き取得
         }
+    }
+    
+    //インターフェイス継承
+    public void HardDrop()
+    {
+        //１列落下
+        _myTrans.position += Vector3.down;
+
+        //落下先に衝突判定がある
+        if (CheckMino())
+        {
+            //もとに戻す
+            _myTrans.position += Vector3.up;
+            //ミノをフィールドに設定
+            foreach (IMinoInfo mino in _minos)
+            {
+                //コミット
+                _fieldCtrl.SetMino(mino.MinoX, mino.MinoY);
+                //親子関係削除
+                mino.DisConnect();
+            }
+            //落下タイマー初期化
+            _fallTimer = 0;
+
+            return; //処理終了
+        }
+        else //衝突判定がない
+        {
+            //再起呼び出し
+            HardDrop();
+        }
+        return;
     }
 
     private void FallMino()
@@ -486,12 +518,6 @@ public class MinoUnionParent : MonoBehaviour, IMinoCreatable, IMinoUnionCtrl
         {
             mino.ChangeColor(_unionColor);
         }
-    }
-
-    // インターフェイス継承
-    public void SetUnionPlayable()
-    {
-
     }
     #endregion
 }
