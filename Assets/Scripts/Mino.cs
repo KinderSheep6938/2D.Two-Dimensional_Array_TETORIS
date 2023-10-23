@@ -83,6 +83,9 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     //インターフェイス継承
     public void LineCtrl(List<int> deleteLineHeights)
     {
+        //ホールド中のミノは無視する
+        if (_myTrans.parent != null) { return; }
+
         //削除対象のラインにある場合、削除する
         if (deleteLineHeights.Contains(MinoY)) { DeleteMino(); }
 

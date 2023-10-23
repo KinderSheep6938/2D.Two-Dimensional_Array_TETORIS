@@ -12,6 +12,7 @@ public class PlayerInput : MonoBehaviour
 {
     #region 変数
     private IMinoUnionCtrl _minoUnion = default; //ミノ操作システムのインターフェイス
+    private IMinoHoldable _holdSystem = default;
     #endregion
 
     #region プロパティ
@@ -25,6 +26,7 @@ public class PlayerInput : MonoBehaviour
     void Awake()
     {
         _minoUnion = GetComponent<IMinoUnionCtrl>();
+        _holdSystem = FindObjectOfType<HoldSystem>().GetComponent<IMinoHoldable>();
     }
 
     /// <summary>
@@ -53,7 +55,9 @@ public class PlayerInput : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.D)) { _minoUnion.Move(1); }
         if (Input.GetKeyDown(KeyCode.Q)) { _minoUnion.Rotate(-1); }
         if (Input.GetKeyDown(KeyCode.E)) { _minoUnion.Rotate(1); }
-        if (Input.GetKeyDown(KeyCode.S)) { _minoUnion.HardDrop(); }
+        if (Input.GetKeyDown(KeyCode.W)) { _minoUnion.HardDrop(); }
+        if (Input.GetKey(KeyCode.S)) { _minoUnion.SoftDrop(); }
+        if (Input.GetKeyDown(KeyCode.R)) { _holdSystem.Hold(); }
     }
     #endregion
 }

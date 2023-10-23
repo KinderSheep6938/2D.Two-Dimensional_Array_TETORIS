@@ -7,6 +7,7 @@ TagManager:
   - PlayableMino
   - ObjectPool
   - FieldManager
+  - HoldMino
   layers:
   - Default
   - TransparentFX

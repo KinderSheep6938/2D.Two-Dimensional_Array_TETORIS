@@ -63,10 +63,7 @@ public class MinoFactory : MonoBehaviour
     /// </summary>
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.C))
-        {
-            CreateMino();
-        }
+
     }
 
     /// <summary>

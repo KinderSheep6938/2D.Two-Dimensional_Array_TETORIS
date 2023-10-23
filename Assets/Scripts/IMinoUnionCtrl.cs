@@ -29,4 +29,10 @@ public interface IMinoUnionCtrl
     /// <para>ƒ~ƒm‚ğ‹}~‰º‚³‚¹‚Ü‚·</para>
     /// </summary>
     void HardDrop();
+
+    /// <summary>
+    /// <para>SoftDrop</para>
+    /// <para>ƒ~ƒm‚ğ‘f‘‚­—‰º‚³‚¹‚Ü‚·</para>
+    /// </summary>
+    void SoftDrop();
 }
