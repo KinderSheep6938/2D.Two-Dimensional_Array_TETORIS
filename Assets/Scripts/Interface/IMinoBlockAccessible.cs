@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public interface IMinoInfo
+public interface IMinoBlockAccessible
 {
     int MinoX { get; }
     int MinoY { get; }

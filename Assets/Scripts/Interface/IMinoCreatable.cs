@@ -28,12 +28,12 @@ public interface IMinoCreatable
 
     MinoType MyModel { get; }
 
-    IMinoInfo[] Minos { get; }
+    IMinoBlockAccessible[] Minos { get; }
 
     /// <summary>
     /// <para>CreateMinoUnit</para>
     /// <para>指定されたミノ形にミノブロックを設定します</para>
     /// </summary>
     /// <param name="setModel">変形するミノ形</param>
-    void CreateMinoUnit(IMinoInfo[] minoBlocks,MinoType setModel);
+    void CreateMinoUnit(IMinoBlockAccessible[] minoBlocks,MinoType setModel);
 }

@@ -11,12 +11,12 @@ using UnityEngine;
 public class MinoPoolManager : MonoBehaviour
 {
     #region 変数
-    const int MAX_MINO_CNT = 4;
+    private const int MAX_MINO_CNT = 4;
 
     [SerializeField,Tooltip("ミノブロック")]
     private GameObject _minoBlock = default;
     private GameObject _instantiateMino = default;
-    private IMinoInfo[] _useableMinos = new IMinoInfo[MAX_MINO_CNT];
+    private IMinoBlockAccessible[] _useableMinos = new IMinoBlockAccessible[MAX_MINO_CNT];
     #endregion
 
     #region プロパティ
@@ -53,14 +53,14 @@ public class MinoPoolManager : MonoBehaviour
     /// <para>ObjectPoolから使用可能なミノブロックを取得します</para>
     /// </summary>
     /// <returns>使用可能なミノブロック</returns>
-    public IMinoInfo[] GetUseableMino()
+    public IMinoBlockAccessible[] GetUseableMino()
     {
         //現在はInstantiate
 
         //使用可能なミノブロックを取得
         for(int i = 0; i < MAX_MINO_CNT; i++)
         {
-            _useableMinos[i] = Instantiate(_minoBlock).GetComponent<IMinoInfo>();
+            _useableMinos[i] = Instantiate(_minoBlock).GetComponent<IMinoBlockAccessible>();
         }
         //使用可能なミノブロックを送信
         return _useableMinos;

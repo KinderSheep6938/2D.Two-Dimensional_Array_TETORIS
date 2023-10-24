@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------------------
-// HoldSystem.cs
+// HoldMino.cs
 //
 // 作成日: 2023/10/22
 // 作成者: Shizuku
@@ -8,14 +8,14 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HoldSystem : MinoModelCreate, IMinoHoldable, IMinoCreatable
+public class HoldMino : MinoModelGeneration
 {
     #region 変数
-    const string PLAYABLE_MINOCTRL_TAG = "PlayableMino";
+    private const string PLAYABLE_MINOCTRL_TAG = "PlayableMino";
 
     private IMinoCreatable.MinoType _holdModel = default; //ホールド切り替え退避用変数
 
-    private IMinoInfo[] _holdMinos = new IMinoInfo[IMinoCreatable.MAX_MINO_CNT];
+    private IMinoBlockAccessible[] _holdMinos = new IMinoBlockAccessible[IMinoCreatable.MAX_MINO_CNT];
     private bool _hasHold = false;
 
     private IMinoCreatable _playerMino = default;
@@ -53,7 +53,7 @@ public class HoldSystem : MinoModelCreate, IMinoHoldable, IMinoCreatable
     }
 
     // クラス継承
-    public override void CreateMinoUnit(IMinoInfo[] minoBlocks, IMinoCreatable.MinoType setModel)
+    public override void CreateMinoUnit(IMinoBlockAccessible[] minoBlocks, IMinoCreatable.MinoType setModel)
     {
         //基底メソッドを使用
         base.CreateMinoUnit(minoBlocks, setModel);

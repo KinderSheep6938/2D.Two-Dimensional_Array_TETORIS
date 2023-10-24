@@ -26,7 +26,7 @@ public class PlayerInput : MonoBehaviour
     void Awake()
     {
         _minoUnion = GetComponent<IMinoUnionCtrl>();
-        _holdSystem = FindObjectOfType<HoldSystem>().GetComponent<IMinoHoldable>();
+        _holdSystem = FindObjectOfType<HoldMino>().GetComponent<IMinoHoldable>();
     }
 
     /// <summary>

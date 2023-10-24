@@ -8,16 +8,16 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class FieldManager : MonoBehaviour, IFieldCtrl
+public class FieldManager : MonoBehaviour, IFieldAccess
 {
     #region 変数
     //リスト管理定数
-    const int FIELD_MAX_WIDTH = 10; //フィールドの横幅
-    const int FIELD_MAX_HEIGHT = 25; //フィールドの縦幅
-    const int FIELD_VIEW_HEIGHT = 21; //フィールドの最大表示縦幅
-    const int TILE_NONE_ID = 0; //フィールドの空白ID
-    const int TILE_MINO_ID = 1; //ミノID
-    const int MAX_COMMITMINO_CNT = 4;
+    private const int FIELD_MAX_WIDTH = 10; //フィールドの横幅
+    private const int FIELD_MAX_HEIGHT = 25; //フィールドの縦幅
+    private const int FIELD_VIEW_HEIGHT = 21; //フィールドの最大表示縦幅
+    private const int TILE_NONE_ID = 0; //フィールドの空白ID
+    private const int TILE_MINO_ID = 1; //ミノID
+    private const int MAX_COMMITMINO_CNT = 4;
 
     [SerializeField]
     private GameObject _fieldTileObj = default; //空白タイル
@@ -28,7 +28,7 @@ public class FieldManager : MonoBehaviour, IFieldCtrl
     private int _fallValue = 0; //ライン削除の落下距離
     private int _commitCnt = 0; //設置した操作ミノブロックの数
 
-    private Transform _myTrans = default;
+    private Transform _transform = default;
     #endregion
 
     #region メソッド
@@ -38,7 +38,7 @@ public class FieldManager : MonoBehaviour, IFieldCtrl
     void Awake()
     {
         //変数初期化
-        _myTrans = transform;
+        _transform = transform;
 
         //マップ初期化
         for(int y = 0; y < FIELD_MAX_HEIGHT; y++) //縦軸
@@ -55,7 +55,7 @@ public class FieldManager : MonoBehaviour, IFieldCtrl
                         _fieldTileObj,
                         Vector3.right * x + Vector3.up * y,
                         Quaternion.identity,
-                        _myTrans
+                        _transform
                         );
                 }
             }

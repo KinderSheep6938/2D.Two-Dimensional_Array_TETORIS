@@ -8,19 +8,19 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
+public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
 {
     #region 変数
     private int _deleteLineIndex = default;
 
     private MinoPoolManager minoManager = default;
     private SpriteRenderer _myRen = default;
-    private Transform _myTrans = default;
+    private Transform _transform = default;
     #endregion
 
     #region プロパティ
-    public int MinoX { get => Mathf.RoundToInt(_myTrans.position.x); }
-    public int MinoY { get => Mathf.RoundToInt(_myTrans.position.y); }
+    public int MinoX { get => Mathf.RoundToInt(_transform.position.x); }
+    public int MinoY { get => Mathf.RoundToInt(_transform.position.y); }
     
     #endregion
 
@@ -32,7 +32,7 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     {
         //初期化
         minoManager = FindObjectOfType<MinoPoolManager>().GetComponent<MinoPoolManager>();
-        _myTrans = transform;
+        _transform = transform;
         _myRen = GetComponent<SpriteRenderer>();
     }
 
@@ -50,7 +50,7 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     void Update()
     {
         //向き初期化
-        if(_myTrans.eulerAngles.z != 0) { _myTrans.eulerAngles = Vector3.zero; }
+        if(_transform.eulerAngles.z != 0) { _transform.eulerAngles = Vector3.zero; }
     }
 
     //インターフェイス継承
@@ -64,27 +64,27 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     public void SetMinoPos(float x, float y, Transform parent)
     {
         //軸を中心に座標調整
-        _myTrans.position = parent.position + Vector3.right * x + Vector3.up * y;
+        _transform.position = parent.position + Vector3.right * x + Vector3.up * y;
         //軸を親に設定
-        _myTrans.parent = parent;
+        _transform.parent = parent;
     }
 
     //インターフェイス継承
     public void DisConnect()
     {
         //親子関係削除
-        _myTrans.parent = null;
+        _transform.parent = null;
         //座標正規化
-        _myTrans.position =
-            Vector3.right * Mathf.RoundToInt(_myTrans.position.x) +
-            Vector3.up * Mathf.RoundToInt(_myTrans.position.y);
+        _transform.position =
+            Vector3.right * Mathf.RoundToInt(_transform.position.x) +
+            Vector3.up * Mathf.RoundToInt(_transform.position.y);
     }
 
     //インターフェイス継承
     public void LineCtrl(List<int> deleteLineHeights)
     {
         //ホールド中のミノは無視する
-        if (_myTrans.parent != null) { return; }
+        if (_transform.parent != null) { return; }
 
         //削除対象のラインにある場合、削除する
         if (deleteLineHeights.Contains(MinoY)) { DeleteMino(); }
@@ -125,7 +125,7 @@ public class Mino : MonoBehaviour, IMinoInfo, ILineMinoCtrl
     /// <param name="value">落下距離</param>
     private void DownMino(int value)
     {
-        _myTrans.position += Vector3.down * value;
+        _transform.position += Vector3.down * value;
         return;
     }
 
