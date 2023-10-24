@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameCtrlManager : MonoBehaviour
+public class GameCtrlManager
 {
     #region 変数
     [SerializeField,Tooltip("MinoFactory")] //ミノ生成機構
@@ -35,7 +35,9 @@ public class GameCtrlManager : MonoBehaviour
     /// </summary>
     void Start()
     {
-        _factorySystem.CreateMino();
+        //ネクストミノと操作ミノの二つにミノを送らなければいかないため、ミノ生成を２回行う
+        _factorySystem.CreateMino(); //ミノ生成
+        _factorySystem.CreateMino(); //ミノ生成
     }
 
     /// <summary>

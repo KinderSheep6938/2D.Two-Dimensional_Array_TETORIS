@@ -20,6 +20,18 @@ public class GhostMino : AccessibleToField, IGhostStartable
     #endregion
 
     #region メソッド
+    /// <summary>
+    /// 初期化処理
+    /// </summary>
+    void Awake()
+    {
+        //ミノブロック初期化
+        CreateMinoUnit(GetComponentsInChildren<IMinoBlockAccessible>(), IMinoCreatable.MinoType.minoT);
+
+        //ゴースト落とす
+        Drop();
+    }
+
     //インターフェイス継承
     public void ChangeTransformGhost(Transform playableMino)
     {
@@ -31,19 +43,12 @@ public class GhostMino : AccessibleToField, IGhostStartable
     }
 
     //インターフェイス継承
-    public void ChangeModelGhost(IMinoCreatable.MinoType playableMino)
+    public void ChangeModelGhost(IMinoCreatable.MinoType playableMino, Vector3 minoParentPos)
     {
         //操作中のミノの形をゴーストに反映させる
-        if(Minos.Length != 0) //ゴーストのミノが設定されているか
-        {
-            //ゴースト形成
-            CreateMinoUnit(Minos, playableMino);
-        }
-        else //設定されていない
-        {
-            //子付けされているミノブロックを設定し、ゴースト形成
-            CreateMinoUnit(GetComponentsInChildren<IMinoBlockAccessible>(), playableMino);
-        }
+        CreateMinoUnit(Minos, playableMino);
+        //操作中のミノの位置をゴーストに反映させる
+        MyTransform.position = minoParentPos;
 
         //ゴースト落とす
         Drop();
@@ -77,9 +82,9 @@ public class GhostMino : AccessibleToField, IGhostStartable
     {
         base.CreateMinoUnit(minoBlocks, setModel);
 
-        foreach(IMinoBlockAccessible mino in minoBlocks)
+        foreach(SpriteRenderer minoSprite in GetComponentsInChildren<SpriteRenderer>())
         {
-            
+            minoSprite.color = Color.white;
         }
     }
     #endregion

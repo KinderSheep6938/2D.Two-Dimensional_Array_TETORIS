@@ -12,8 +12,6 @@ using UnityEngine;
 public class MinoFactory : MonoBehaviour
 {
     #region 変数
-    const string PLAYABLE_MINOCTRL_TAG = "PlayableMino";
-
     private IMinoCreatable _minoCreator = default; //ミノの形生成インターフェイス
     private MinoPoolManager _minoManager = default; //ミノブロックのオブジェクトプール
 
@@ -44,7 +42,7 @@ public class MinoFactory : MonoBehaviour
     void Awake()
     {
         //初期化
-        _minoCreator = GameObject.FindGameObjectWithTag(PLAYABLE_MINOCTRL_TAG).GetComponent<IMinoCreatable>();
+        _minoCreator = FindObjectOfType<NextMinoView>().GetComponent<IMinoCreatable>();
         _minoManager = GetComponent<MinoPoolManager>();
         _canCreateModels.Clear();
         _canCreateModels.AddRange(_InitializeModels);

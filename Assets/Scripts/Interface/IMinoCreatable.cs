@@ -10,10 +10,10 @@ using UnityEngine;
 
 public interface IMinoCreatable
 {
-    const int MAX_MINO_CNT = 4; //最大ミノブロック数
-    const float EXCEPTION_SHIFT_0_5 = 0.5f; //ミノ形生成用0.5差分
-    const float EXCEPTION_SHIFT_1_0 = 1.0f; //ミノ形生成用1.0差分
-    const float EXCEPTION_SHIFT_1_5 = 1.5f; //ミノ形生成用1.5差分
+    public const int MAX_MINO_CNT = 4; //最大ミノブロック数
+    public const float EXCEPTION_SHIFT_0_5 = 0.5f; //ミノ形生成用0.5差分
+    public const float EXCEPTION_SHIFT_1_0 = 1.0f; //ミノ形生成用1.0差分
+    public const float EXCEPTION_SHIFT_1_5 = 1.5f; //ミノ形生成用1.5差分
 
     enum MinoType //ミノ形
     {

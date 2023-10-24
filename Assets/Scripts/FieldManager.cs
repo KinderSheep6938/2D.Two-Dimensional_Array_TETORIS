@@ -28,6 +28,8 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private int _fallValue = 0; //ライン削除の落下距離
     private int _commitCnt = 0; //設置した操作ミノブロックの数
 
+
+
     private Transform _transform = default;
     #endregion
 

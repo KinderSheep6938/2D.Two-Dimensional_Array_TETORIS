@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class HoldMino : MinoModelGeneration
+public class HoldMino : MinoModelGeneration, IMinoHoldable
 {
     #region 変数
     private const string PLAYABLE_MINOCTRL_TAG = "PlayableMino";
@@ -63,6 +63,7 @@ public class HoldMino : MinoModelGeneration
     //インターフェイス継承
     public void Hold()
     {
+        Debug.Log("Hold");
         //保持しているモデルを退避
         _holdModel = MyModel;
         _holdMinos = Minos;

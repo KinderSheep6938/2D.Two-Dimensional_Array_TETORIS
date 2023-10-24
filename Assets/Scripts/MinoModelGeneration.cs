@@ -44,6 +44,8 @@ public class MinoModelGeneration : MonoBehaviour,IMinoCreatable
         _minos = new List<IMinoBlockAccessible>(minoBlocks).ToArray();
         _myModel = setModel;
 
+        Debug.Log(_transform.name + "|" + _minos.Length);
+
         //指定されたモデルに応じて、ミノブロックの位置と色を設定
         switch (_myModel)
         {

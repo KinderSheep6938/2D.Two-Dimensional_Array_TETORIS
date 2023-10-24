@@ -22,5 +22,5 @@ public interface IGhostStartable
     /// <para>操作ミノのミノ形に変更が生じた時に呼び出されます</para>
     /// </summary>
     /// <param name="playableMino">操作ミノ</param>
-    void ChangeModelGhost(IMinoCreatable.MinoType playableMino);
+    void ChangeModelGhost(IMinoCreatable.MinoType playableMino, Vector3 minoParentPos);
 }

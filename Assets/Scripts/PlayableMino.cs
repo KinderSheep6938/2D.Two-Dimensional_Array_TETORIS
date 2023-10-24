@@ -28,20 +28,20 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
 
     //プレイヤー操作制御用
     private const float ROTATE_VALUE = 90f; //回転処理の回転角度
-    private const float FALL_TIME = 0.5f; //落下時間
     private const float SOFTDROP_SPEED = 4.5f; //ソフトドロップの倍速速度
-    
+
     private int _nowAngle = 0; //現在のミノの向き
     private int _moveDire = 0; //回転方向
     private bool _needReturn = false; //回転巻き戻し判定
     private int _srsCnt = 0; //スパロテの回数
-    private float _fallTimer = 0; //落下計測タイマー
+    private float _fallTime = 1f; //落下時間
+    private float _timer = 0; //落下計測タイマー
 
     private IGhostStartable _ghost = default; //ゴーストシステム
     #endregion
 
     #region プロパティ
-
+    public float FallTime { set => _fallTime = value; }
     #endregion
 
     #region メソッド
@@ -133,7 +133,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
             //ミノをフィールドに設定
             SetMinoForField();
             //落下タイマー初期化
-            _fallTimer = 0;
+            _timer = 0;
 
             return; //処理終了
         }
@@ -149,17 +149,17 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     public void SoftDrop()
     {
         //タイマー倍増
-        _fallTimer += Time.deltaTime * SOFTDROP_SPEED;
+        _timer += Time.deltaTime * SOFTDROP_SPEED;
     }
 
     private void FallMino()
     {
-        _fallTimer += Time.deltaTime; //タイマー加算
+        _timer += Time.deltaTime; //タイマー加算
 
         //落下時間になったか
-        if(FALL_TIME < _fallTimer)
+        if(FALL_TIME < _timer)
         {
-            _fallTimer = 0;
+            _timer = 0;
             //ミノを１マス落下
             MyTransform.position += Vector3.down;
 
@@ -173,8 +173,6 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
             }
         }
     }
-
-
 
     /// <summary>
     /// <para>SRSByThree</para>
@@ -432,7 +430,6 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         if(MyModel == IMinoCreatable.MinoType.minoO) //Oミノ
         {
             MyTransform.position += Vector3.right * IMinoCreatable.EXCEPTION_SHIFT_0_5 + Vector3.up * IMinoCreatable.EXCEPTION_SHIFT_0_5;
-            return;
         }
         if(MyModel == IMinoCreatable.MinoType.minoI) //Iミノ
         {
@@ -440,7 +437,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         }
 
         //ゴースト設定
-        _ghost.ChangeModelGhost(MyModel);
+        _ghost.ChangeModelGhost(MyModel, MyTransform.position);
     }
     #endregion
 }
