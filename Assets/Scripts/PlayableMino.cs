@@ -34,9 +34,14 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     private int _moveDire = 0; //回転方向
     private bool _needReturn = false; //回転巻き戻し判定
     private int _srsCnt = 0; //スパロテの回数
-    private float _fallTime = 1f; //落下時間
+    private float _fallTime = 0.8f; //落下時間
     private float _timer = 0; //落下計測タイマー
 
+    [SerializeField, Tooltip("回転SE")]
+    private AudioClip _rotateSE = default;
+    [SerializeField, Tooltip("ハードドロップSE")]
+    private AudioClip _hardDropSE = default;
+    private AudioSource _myAudio = default; //自身のAudioSource
     private IGhostStartable _ghost = default; //ゴーストシステム
     #endregion
 
@@ -51,6 +56,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     void Awake()
     {
         _ghost = FindObjectOfType<GhostMino>(); //ゴースト取得
+        _myAudio = GetComponent<AudioSource>();
     }
 
     /// <summary>
@@ -91,6 +97,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     // インターフェイス継承
     public void Rotate(int angle)
     {
+        _myAudio.PlayOneShot(_rotateSE); //効果音再生
         //回転反映
         MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * angle;
 
@@ -122,6 +129,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     //インターフェイス継承
     public void HardDrop()
     {
+        _myAudio.PlayOneShot(_hardDropSE); //効果音再生
         //１列落下
         MyTransform.position += Vector3.down;
 
@@ -157,7 +165,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         _timer += Time.deltaTime; //タイマー加算
 
         //落下時間になったか
-        if(FALL_TIME < _timer)
+        if(_fallTime < _timer)
         {
             _timer = 0;
             //ミノを１マス落下
@@ -438,6 +446,12 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
 
         //ゴースト設定
         _ghost.ChangeModelGhost(MyModel, MyTransform.position);
+
+        //生成位置にミノが既にあるか
+        if (CheckMino())
+        {
+
+        }
     }
     #endregion
 }

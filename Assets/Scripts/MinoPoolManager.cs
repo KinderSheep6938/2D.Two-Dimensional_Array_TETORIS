@@ -12,10 +12,10 @@ public class MinoPoolManager : MonoBehaviour
 {
     #region 変数
     private const int MAX_MINO_CNT = 4;
+    
 
     [SerializeField,Tooltip("ミノブロック")]
     private GameObject _minoBlock = default;
-    private GameObject _instantiateMino = default;
     private IMinoBlockAccessible[] _useableMinos = new IMinoBlockAccessible[MAX_MINO_CNT];
     #endregion
 

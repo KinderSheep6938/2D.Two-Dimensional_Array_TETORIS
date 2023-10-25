@@ -8,12 +8,13 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class GameCtrlManager
+public class GameCtrlManager : MonoBehaviour
 {
     #region 変数
-    [SerializeField,Tooltip("MinoFactory")] //ミノ生成機構
+    private const int GAMEEND_ID = -1;
+    private const int PLAYING_ID = 0;
+
     private MinoFactory _factorySystem = default;
-    [SerializeField,Tooltip("FieldManager")] //フィールド管理機構
     private FieldManager _fieldSystem = default;
     #endregion
 
@@ -27,7 +28,8 @@ public class GameCtrlManager
     /// </summary>
     void Awake()
     {
-
+        _factorySystem = GetComponent<MinoFactory>();
+        _fieldSystem = GetComponent<FieldManager>();
     }
 
     /// <summary>
@@ -45,8 +47,11 @@ public class GameCtrlManager
     /// </summary>
     void Update()
     {
+        //ゲーム終了
+        if(_fieldSystem.GetPlayStatus() == GAMEEND_ID) { }
+
         //操作中か
-        if (!_fieldSystem.GetCommitStatus()) { return; /*操作中*/ }
+        if (_fieldSystem.GetPlayStatus() == PLAYING_ID) { return; /*操作中*/ }
         
         //操作が終了している
         _factorySystem.CreateMino(); //ミノ生成

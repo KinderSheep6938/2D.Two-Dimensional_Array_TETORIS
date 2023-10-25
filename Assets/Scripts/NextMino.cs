@@ -8,7 +8,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class NextMinoView : MinoModelGeneration
+public class NextMino : MinoModelGeneration
 {
     #region ïœêî
     private const string PLAYABLEMINO_TAG = "PlayableMino";

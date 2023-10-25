@@ -42,7 +42,7 @@ public class MinoFactory : MonoBehaviour
     void Awake()
     {
         //èâä˙âª
-        _minoCreator = FindObjectOfType<NextMinoView>().GetComponent<IMinoCreatable>();
+        _minoCreator = FindObjectOfType<NextMino>().GetComponent<IMinoCreatable>();
         _minoManager = GetComponent<MinoPoolManager>();
         _canCreateModels.Clear();
         _canCreateModels.AddRange(_InitializeModels);

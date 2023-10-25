@@ -26,4 +26,10 @@ public interface IFieldAccess
     /// <param name="x">設定座標の横軸</param>
     /// <param name="y">設定座標の縦軸</param>
     void SetMino(int x,int y);
+
+    /// <summary>
+    /// <para>NotPlayable</para>
+    /// <para>このフィールドでプレイが不可能であることを設定します</para>
+    /// </summary>
+    void NotPlayable();
 }

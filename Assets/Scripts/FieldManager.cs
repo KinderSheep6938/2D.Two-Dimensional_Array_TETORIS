@@ -17,20 +17,28 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private const int FIELD_VIEW_HEIGHT = 21; //フィールドの最大表示縦幅
     private const int TILE_NONE_ID = 0; //フィールドの空白ID
     private const int TILE_MINO_ID = 1; //ミノID
-    private const int MAX_COMMITMINO_CNT = 4;
+    private const int MAX_COMMITMINO_CNT = 4; //操作ミノの数
+    private const int TETRIS_LINE = 4; //テトリス判定ライン数
 
-    [SerializeField]
+    [SerializeField,Tooltip("空白タイル")]
     private GameObject _fieldTileObj = default; //空白タイル
+    [SerializeField, Tooltip("フィールド管理オブジェクト")]
+    private Transform _fieldParent = default; //フィールド管理オブジェ
 
     private int[,] _field = new int[FIELD_MAX_HEIGHT,FIELD_MAX_WIDTH]; //フィールド保存 [縦軸:y,横軸:x]
     private List<int> _deleteLineIndexs = new(); //完成ラインのIndex保存用
     private bool _isLine = false; //完成ライン判定
     private int _fallValue = 0; //ライン削除の落下距離
     private int _commitCnt = 0; //設置した操作ミノブロックの数
+    private bool _canPlay = true; //フィールドでのプレイ可否判定
 
+    [SerializeField, Tooltip("ライン消去エフェクト")]
+    private LineEffect[] _deleteLineEfe = default;
+    [SerializeField, Tooltip("ライン消去SE 0:通常 1:テトリス")]
+    private AudioClip[] _deleteLineSE = default;
+    private AudioSource _myAudio = default; //自身のAudioSource
 
-
-    private Transform _transform = default;
+    private ScoreManager _scoreSystem = default;
     #endregion
 
     #region メソッド
@@ -39,9 +47,6 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     /// </summary>
     void Awake()
     {
-        //変数初期化
-        _transform = transform;
-
         //マップ初期化
         for(int y = 0; y < FIELD_MAX_HEIGHT; y++) //縦軸
         {
@@ -57,13 +62,16 @@ public class FieldManager : MonoBehaviour, IFieldAccess
                         _fieldTileObj,
                         Vector3.right * x + Vector3.up * y,
                         Quaternion.identity,
-                        _transform
+                        _fieldParent
                         );
                 }
             }
         }
         //ライン検査初期化
         _deleteLineIndexs.Clear();
+
+        _myAudio = GetComponent<AudioSource>();
+        _scoreSystem = GetComponent<ScoreManager>();
     }
 
     /// <summary>
@@ -85,6 +93,7 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     /// <summary>
     /// <para>CheckLine</para>
     /// <para>フィールドの中でラインができているか検査します</para>
+    /// <para>また、ラインができていた場合、スコアを加算します</para>
     /// </summary>
     private void CheckLine()
     {
@@ -116,8 +125,20 @@ public class FieldManager : MonoBehaviour, IFieldAccess
             }
         }
 
-        //削除対象が一つ以上ある場合は削除処理を行う
-        if(_deleteLineIndexs.Count != 0) { DeleteLine(); }
+        //削除対象ラインがある
+        if(_deleteLineIndexs.Count != 0)
+        {
+            //効果音
+            _myAudio.PlayOneShot(_deleteLineSE[_deleteLineIndexs.Count / TETRIS_LINE]);
+            //列ごとにエフェクト
+            for(int i = 0; i < _deleteLineIndexs.Count; i++) { _deleteLineEfe[i].SetEffect(_deleteLineIndexs[i]); }
+
+            //削除処理を行う
+            DeleteLine();
+
+            //スコア加算
+            _scoreSystem.AddScore(_deleteLineIndexs.Count);
+        }
 
         return;
     }
@@ -171,23 +192,30 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     }
 
     /// <summary>
-    /// <para>GetCommitStatus</para>
-    /// <para>操作中のミノが設置されたかどうか検査します</para>
+    /// <para>GetPlayStatus</para>
+    /// <para>操作ミノの操作状況を検査します</para>
     /// </summary>
-    /// <returns>操作完了判定</returns>
-    public bool GetCommitStatus()
+    /// <returns>操作判定 -1:プレイ不可能 0:操作中 1:操作終了</returns>
+    public int GetPlayStatus()
     {
+        //プレイが可能ではない
+        if (!_canPlay)
+        {
+            //プレイが不可能であることを返す
+            return -1;
+        }
+
         //設置した回数 が 操作可能なミノの最大数 より多いか
         if(MAX_COMMITMINO_CNT <= _commitCnt)
         {
             //カウントリセット
             _commitCnt = 0;
             //設置が完了していることを返す
-            return true;
+            return 1;
         }
 
         //まだ操作している
-        return false;
+        return 0;
     }
     
     //インターフェイス継承
@@ -213,6 +241,13 @@ public class FieldManager : MonoBehaviour, IFieldAccess
         {
             CheckLine();
         }
+        return;
+    }
+
+    //インターフェイス継承
+    public void NotPlayable()
+    {
+        _canPlay = false;
         return;
     }
     #endregion
