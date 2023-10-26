@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class TetrisEffect : MonoBehaviour
+public class TextEffect : MonoBehaviour
 {
     #region 変数
     const float MAX_VIEW_TIME = 2.5f; //テキストの表示時間

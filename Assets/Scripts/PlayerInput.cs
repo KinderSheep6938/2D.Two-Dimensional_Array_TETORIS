@@ -7,17 +7,20 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class PlayerInput : MonoBehaviour
 {
     #region 変数
-    private const float AUTOREPEAT_TIME = 0.3f; //長押し待機時間
-    private float _longPushTimer = 0f; //長押しタイマー
-
+    //オートリピート機構（長押し移動）
+    private bool _onAutoRepeat = false; //オートリピート開始判定
+    private int _autoRepeatDire = 1; //オートリピート方向
+    private const int RIGHT_DIREID = 1; //右方向ID
+    private const int LEFT_DIREID = -1; //左方向ID
     private const float AUTOREPEAT_MOVETIME = 0.05f; //オートリピートの移動待機時間
     private float _autoRepeatTimer = 0f; //オートリピートタイマー
 
-    private bool _isOnce = false; //一回押し判定
+    private bool _isSoft = false; //ソフトドロップ開始判定
 
     private IMinoUnionCtrl _minoUnion = default; //ミノ操作システムのインターフェイス
     private IMinoHoldable _holdSystem = default; //ホールドシステムのインターフェイス
@@ -50,7 +53,135 @@ public class PlayerInput : MonoBehaviour
     /// </summary>
     void Update()
     {
-        PlayerIO();
+        //オートリピート判定がある
+        if (_onAutoRepeat) { AutoRepeat(_autoRepeatDire); }
+        //ソフトドロップ判定がある
+        if (_isSoft) { _minoUnion.SoftDrop(); }
+    }
+
+    /// <summary>
+    /// <para>OnMoveLeft</para>
+    /// <para>左移動ボタンが押されたときに呼ばれます</para>
+    /// </summary>
+    /// <param name="context">ボタン状態</param>
+    public void OnMoveLeft(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started) //押された
+        {
+            _minoUnion.Move(LEFT_DIREID);
+            _onAutoRepeat = false;
+            AutoRepeatReset();
+        }
+
+        if (context.phase == InputActionPhase.Performed) //押されてから指定した時間がたった
+        {
+            _onAutoRepeat = true;
+            _autoRepeatDire = LEFT_DIREID;
+        }
+
+        if (context.phase == InputActionPhase.Canceled) //離れた
+        {
+            _onAutoRepeat = false;
+            AutoRepeatReset();
+        }
+    }
+
+    /// <summary>
+    /// <para>OnMoveRight</para>
+    /// <para>右移動ボタンが押されたときに呼ばれます</para>
+    /// </summary>
+    /// <param name="context">ボタン状態</param>
+    public void OnMoveRight(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started) //押された
+        {
+            _minoUnion.Move(RIGHT_DIREID);
+            _onAutoRepeat = false;
+            AutoRepeatReset();
+        }
+
+        if (context.phase == InputActionPhase.Performed) //押されてから指定した時間がたった
+        {
+            _onAutoRepeat = true;
+            _autoRepeatDire = RIGHT_DIREID;
+        }
+
+        if (context.phase == InputActionPhase.Canceled) //離れた
+        {
+            _onAutoRepeat = false;
+            AutoRepeatReset();
+        }
+    }
+
+    /// <summary>
+    /// <para>OnRotateLeft</para>
+    /// <para>左回転ボタンが押されたときに呼ばれます</para>
+    /// </summary>
+    /// <param name="context">ボタン状態</param>
+    public void OnRotateLeft(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed) //押された
+        {
+            _minoUnion.Rotate(LEFT_DIREID);
+        }
+    }
+
+    /// <summary>
+    /// <para>OnRotateRight</para>
+    /// <para>右回転ボタンが押されたときに呼ばれます</para>
+    /// </summary>
+    /// <param name="context">ボタン状態</param>
+    public void OnRotateRight(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed) //押された
+        {
+            _minoUnion.Rotate(RIGHT_DIREID);
+        }
+    }
+
+    /// <summary>
+    /// <para>OnHardDrop</para>
+    /// <para>ハードドロップボタンが押されたときに呼ばれます</para>
+    /// </summary>
+    /// <param name="context">ボタン状態</param>
+    public void OnHardDrop(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed) //押された
+        {
+            _minoUnion.HardDrop();
+        }
+    }
+
+    /// <summary>
+    /// <para>OnSoftDrop</para>
+    /// <para>ソフトドロップボタンが押されたときに呼ばれます</para>
+    /// </summary>
+    /// <param name="context">ボタン状態</param>
+    public void OnSoftDrop(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Started) //押された
+        {
+            _isSoft = true;
+        }
+
+        if (context.phase == InputActionPhase.Canceled) //離れた
+        {
+            _isSoft = false;
+        }
+    }
+
+    /// <summary>
+    /// <para>OnHold</para>
+    /// <para>ホールドボタンが押されたときに呼ばれます</para>
+    /// </summary>
+    /// <param name="context">ボタン状態</param>
+    public void OnHold(InputAction.CallbackContext context)
+    {
+        if (context.phase == InputActionPhase.Performed)
+        {
+            //ホールドがない場合は、ホールドする
+            if (!_minoUnion.CheckHasHold()) { _holdSystem.Hold(); }
+        }
     }
 
     /// <summary>
@@ -101,32 +232,15 @@ public class PlayerInput : MonoBehaviour
     /// <param name="x"></param>
     private void AutoRepeat(int x)
     {
-        //長押し待機時間を越していない
-        if(_longPushTimer <= AUTOREPEAT_TIME)
+        _autoRepeatTimer += Time.deltaTime; //タイマー加算
+                                            //タイマーが待機時間を越した
+        if (AUTOREPEAT_MOVETIME <= _autoRepeatTimer)
         {
-            //一回押し判定がない
-            if (!_isOnce)
-            {
-                //移動
-                _minoUnion.Move(x);
-                //一回押し判定
-                _isOnce = true;
-            }
+            //移動
+            _minoUnion.Move(x);
+            //タイマー初期化
+            _autoRepeatTimer = 0;
         }
-        else //長押し
-        {
-            _autoRepeatTimer += Time.deltaTime; //タイマー加算
-            //タイマーが待機時間を越した
-            if(AUTOREPEAT_MOVETIME <= _autoRepeatTimer)
-            {
-                //移動
-                _minoUnion.Move(x);
-                //タイマー初期化
-                _autoRepeatTimer = 0;
-            }
-        }
-
-        _longPushTimer += Time.deltaTime; //タイマー加算
     }
 
     /// <summary>
@@ -137,8 +251,7 @@ public class PlayerInput : MonoBehaviour
     {
         //初期化
         _autoRepeatTimer = 0;
-        _longPushTimer = 0;
-        _isOnce = false;
+        _autoRepeatDire = 0;
     }
     #endregion
 }

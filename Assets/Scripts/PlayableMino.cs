@@ -26,6 +26,12 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     }
     private SRSPosSave _srsPos = new();
 
+    //Tスピン判定用
+    private const int TSPIN_JUDGE_CNT = 3; //Tスピン隅判定値
+    private const int MINITSPIN_JUDGE_VALUE270 = 270; //ミニTスピン判定用角度１
+    private const int MINITSPIN_JUDGE_VALUE180 = 180; //ミニTスピン判定用角度２
+    private const int MINITSPIN_JUDGE_SRSCNT = 4; //ミニTスピン
+
     //プレイヤー操作制御用
     private const float ROTATE_VALUE = 90f; //回転処理の回転角度
     private const float SOFTDROP_SPEED = 4.5f; //ソフトドロップの倍速速度
@@ -253,12 +259,8 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     private void Commit()
     {
         //Tミノである場合はTスピン検査を行う
-        //条件１ : Tミノである (1行目最初)
-        //条件２ : 最後の動作が回転である (1行目最後)
-        //条件３ : 軸を中心とした３ｘ３の４つの角に衝突判定がある (2行目)
-        //すべての条件が合致した場合は、Tスピン判定を設定する
-        if(MyModel == IMinoCreatable.MinoType.minoT && _moveDire != 0
-            && CheckCollisionByCenter(1,1) && CheckCollisionByCenter(-1, 1) && CheckCollisionByCenter(-1, -1) && CheckCollisionByCenter(1, -1))
+        //ミニTスピンは今回の場合はTスピンではないものとして扱う
+        if(MyModel == IMinoCreatable.MinoType.minoT && JudgeTSpin())
         {
             SetTSpin(true); //Tスピンとして設定
         }
@@ -277,6 +279,78 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //ホールド判定
         _isHold = false;
     }
+
+    /// <summary>
+    /// <para>JudgeTSpin</para>
+    /// <para>Tスピンか判定します</para>
+    /// </summary>
+    /// <returns>Tスピン判定</returns>
+    private bool JudgeTSpin()
+    {
+        //条件１：軸を中心とした３ｘ３の４つの隅に衝突判定がある
+        //隅衝突判定カウント用
+        int collisionCnt = 0;
+        //隅判定
+        if(CheckCollisionByCenter(1, 1)) { collisionCnt++; }
+        if(CheckCollisionByCenter(-1, 1)) { collisionCnt++; }
+        if(CheckCollisionByCenter(1, -1)) { collisionCnt++; }
+        if(CheckCollisionByCenter(-1, -1)) { collisionCnt++; }
+        //判定のあった隅がTスピン判定値より小さい場合は、Tスピンではない
+        if (collisionCnt < TSPIN_JUDGE_CNT) { return false; }
+
+        //条件２：最後の動作が回転である
+        //回転でない場合は、Tスピンではない
+        if (_moveDire == 0) { return false; }
+
+        //ここからはミニTスピン判定を行う
+        //これらの条件に合致した場合は、ミニTスピンのためfalseと返す
+        //条件１：凸の両端のどちらかに衝突判定がない
+        Debug.Log((CheckCollisionByCenter(TSpinCos(_nowAngle), TSpinSin(_nowAngle)) && CheckCollisionByCenter(TSpinSin(_nowAngle), TSpinCos(_nowAngle))));
+        if(!(CheckCollisionByCenter(TSpinCos(_nowAngle), TSpinSin(_nowAngle)) && CheckCollisionByCenter(TSpinSin(_nowAngle), TSpinCos(_nowAngle))))
+        {
+            //条件２：スパロテの回転補正の第四条件でないこと
+            if (_srsCnt != MINITSPIN_JUDGE_SRSCNT) { return false; } //ミニTスピンである
+        }
+
+        //すべての条件に合致する場合は、Tスピンである
+        return true;
+
+    }
+
+    /// <summary>
+    /// <para>TSpinCos</para>
+    /// <para>ミニTスピンのアルゴリズム部品</para>
+    /// <para>与えられた値が180度以上であれば-1</para>
+    /// <para>以下であれば1を返します</para>
+    /// </summary>
+    /// <param name="angle">角度</param>
+    /// <returns></returns>
+    private int TSpinSin(float angle)
+    {
+        if(MINITSPIN_JUDGE_VALUE180 <= angle)
+        {
+            return -1;
+        }
+        return 1;
+    }
+
+    /// <summary>
+    /// <para>TSpinCos</para>
+    /// <para>ミニTスピンのアルゴリズム部品</para>
+    /// <para>与えられた値が270度で割り切れるまたは0度の時は-1</para>
+    /// <para>それ以外であれば1を返します</para>
+    /// </summary>
+    /// <param name="angle">角度</param>
+    /// <returns></returns>
+    private int TSpinCos(float angle)
+    {
+        if (angle % MINITSPIN_JUDGE_VALUE270 == 0)
+        {
+            return -1;
+        }
+        return 1;
+    }
+
 
     /// <summary>
     /// <para>SRSByThree</para>

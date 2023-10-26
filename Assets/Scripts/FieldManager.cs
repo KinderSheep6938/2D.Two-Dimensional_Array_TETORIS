@@ -11,22 +11,21 @@ using UnityEngine;
 public class FieldManager : MonoBehaviour, IFieldAccess
 {
     #region 変数
-    //リスト管理定数
+    //フィールド管理定数
     private const int FIELD_MAX_WIDTH = 10; //フィールドの横幅
     private const int FIELD_MAX_HEIGHT = 25; //フィールドの縦幅
     private const int FIELD_VIEW_HEIGHT = 21; //フィールドの最大表示縦幅
     private const int TILE_NONE_ID = 0; //フィールドの空白ID
     private const int TILE_MINO_ID = 1; //ミノID
+    //ゲームフロー制御用
     private const int MAX_COMMITMINO_CNT = 4; //操作ミノの数
-    private const int TETRIS_LINE = 4; //テトリス判定ライン数
     private const int GAMEEND_ID = -1; //ゲーム不可能状態ID
     private const int PLAYING_ID = 0; //プレイ中状態ID
     private const int COMMIT_ID = 1; //操作完了状態ID
 
-    [SerializeField,Tooltip("空白タイル")]
-    private GameObject _fieldTileObj = default; //空白タイル
-    [SerializeField, Tooltip("フィールド管理オブジェクト")]
-    private Transform _fieldParent = default; //フィールド管理オブジェ
+    //その他
+    private const int TETRIS_LINE = 4; //テトリス判定ライン数
+    private const int TSPIN_SCORE_RATIO = 2; //Tスピン判定のスコア倍増率
 
     private int[,] _field = new int[FIELD_MAX_HEIGHT,FIELD_MAX_WIDTH]; //フィールド保存 [縦軸:y,横軸:x]
     private List<int> _deleteLineIndexs = new(); //完成ラインのIndex保存用
@@ -36,10 +35,17 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private bool _canPlay = true; //フィールドでのプレイ可否判定
     private bool _tSpin = false; //Tスピン判定
 
+    [SerializeField, Tooltip("空白タイル")]
+    private GameObject _fieldTileObj = default; //空白タイル
+    [SerializeField, Tooltip("フィールド管理オブジェクト")]
+    private Transform _fieldParent = default; //フィールド管理オブジェ
+
     [SerializeField, Tooltip("ライン消去エフェクト")]
     private LineEffect[] _deleteLineEfe = default;
     [SerializeField, Tooltip("テトリステキスト")]
-    private TetrisEffect _tetrisText = default;
+    private TextEffect _tetrisText = default;
+    [SerializeField, Tooltip("Tスピンテキスト")]
+    private TextEffect _tSpinText = default;
     [SerializeField, Tooltip("ライン消去SE 0:通常 1:テトリス")]
     private AudioClip[] _deleteLineSE = default;
     private AudioSource _myAudio = default; //自身のAudioSource
@@ -139,21 +145,27 @@ public class FieldManager : MonoBehaviour, IFieldAccess
         //削除対象ラインがある
         if(_deleteLineIndexs.Count != 0)
         {
+            //削除処理を行う
+            DeleteLine();
+
             //効果音
             _myAudio.PlayOneShot(_deleteLineSE[_deleteLineIndexs.Count / TETRIS_LINE]);
 
             //列ごとにエフェクト
             for(int i = 0; i < _deleteLineIndexs.Count; i++) { _deleteLineEfe[i].SetEffect(_deleteLineIndexs[i]); }
             //4列の場合はテトリスエフェクト (引数としては一番上の列を渡す)
-            if(_deleteLineIndexs.Count == TETRIS_LINE) { _tetrisText.SetView(); }
-
-            //削除処理を行う
-            DeleteLine();
-
+            if (_deleteLineIndexs.Count == TETRIS_LINE) { _tetrisText.SetView(); }
+            //Tスピン判定の場合は Tスピンエフェクト と スコア倍増
+            if (_tSpin)
+            {
+                _tSpinText.SetView(); //エフェクト
+                _scoreManager.AddScore(_deleteLineIndexs.Count * TSPIN_SCORE_RATIO); //スコア倍増
+                return;
+                
+            }
             //スコア加算
             _scoreManager.AddScore(_deleteLineIndexs.Count);
         }
-
         return;
     }
 
