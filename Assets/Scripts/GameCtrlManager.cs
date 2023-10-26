@@ -12,10 +12,14 @@ public class GameCtrlManager : MonoBehaviour
 {
     #region 変数
     private const int GAMEEND_ID = -1;
-    private const int PLAYING_ID = 0;
+    private const int COMMIT_ID = 1;
+    private int _nowGameStatus = 0;
+
+    private GameObject _gameoverViewObj = default;
 
     private MinoFactory _factorySystem = default;
     private FieldManager _fieldSystem = default;
+
     #endregion
 
     #region プロパティ
@@ -47,14 +51,21 @@ public class GameCtrlManager : MonoBehaviour
     /// </summary>
     void Update()
     {
-        //ゲーム終了
-        if(_fieldSystem.GetPlayStatus() == GAMEEND_ID) { }
+        _nowGameStatus = _fieldSystem.GetPlayStatus();
 
-        //操作中か
-        if (_fieldSystem.GetPlayStatus() == PLAYING_ID) { return; /*操作中*/ }
+        //ゲーム状況がコミット状態ではない
+        if(_nowGameStatus != COMMIT_ID)
+        {
+            //ゲーム状態が終了状態である
+            if(_nowGameStatus == GAMEEND_ID)
+            {
+                _gameoverViewObj.SetActive(true);
+            }
+            return; //操作終了
+        }
         
-        //操作が終了している
-        _factorySystem.CreateMino(); //ミノ生成
+        //コミット状態である場合は新しくミノを生成する
+        _factorySystem.CreateMino();
     }
     #endregion
 }

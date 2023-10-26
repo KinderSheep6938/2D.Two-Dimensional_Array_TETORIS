@@ -35,4 +35,10 @@ public interface IMinoUnionCtrl
     /// <para>ミノを素早く落下させます</para>
     /// </summary>
     void SoftDrop();
+
+    /// <summary>
+    /// <para>MinoHold</para>
+    /// <para>ミノをホールド設定します</para>
+    /// </summary>
+    bool CheckHold();
 }

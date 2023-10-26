@@ -62,16 +62,14 @@ public class GhostMino : AccessibleToField, IGhostStartable
     {
         //再帰処理
 
-        //1マス落とす
-        MyTransform.position += Vector3.down;
-
         //衝突判定があるか
-        if (CheckMino())
+        if (CheckMinoCollision(0, -1))
         {
-            //１マス戻す
-            MyTransform.position += Vector3.up;
             return; //再帰処理終了
         }
+
+        //1マス落とす
+        MyTransform.position += Vector3.down;
 
         //衝突判定があるまで再帰処理
         Drop(); //再帰

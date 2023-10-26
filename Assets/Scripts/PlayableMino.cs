@@ -30,12 +30,24 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     private const float ROTATE_VALUE = 90f; //回転処理の回転角度
     private const float SOFTDROP_SPEED = 4.5f; //ソフトドロップの倍速速度
 
+    //回転系統 スパロテなど
     private int _nowAngle = 0; //現在のミノの向き
     private int _moveDire = 0; //回転方向
     private bool _needReturn = false; //回転巻き戻し判定
     private int _srsCnt = 0; //スパロテの回数
-    private float _fallTime = 0.8f; //落下時間
-    private float _timer = 0; //落下計測タイマー
+
+    //自由落下
+    private float _minoFallTime = 0.8f; //落下時間
+    private float _fallTimer = 0; //落下計測タイマー
+
+    //ロックダウン機構
+    private const float LOCKDOWN_WAIT_TIMER = 0.5f; //設置待機時間
+    private float _waitTimer = 0; //待機タイマー
+    private int _lockDownCancel = 0; //設置回避数
+    private const int MAX_CANCEL_CNT = 15; //最大回避数
+
+    //ホールド判定
+    private bool _isHold = false;
 
     [SerializeField, Tooltip("回転SE")]
     private AudioClip _rotateSE = default;
@@ -46,7 +58,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     #endregion
 
     #region プロパティ
-    public float FallTime { set => _fallTime = value; }
+    public float FallTime { set => _minoFallTime = value; }
     #endregion
 
     #region メソッド
@@ -72,26 +84,32 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     /// </summary>
     void Update()
     {
+        //ミノブロックが渡されている（子付けされている）
         if (MyTransform.childCount == 0) { return; }
 
-        //時間経過落下
-        FallMino();
+        if (CheckMinoCollision(0, -1))
+        {
+            //設置判定
+            LockDown();
+        }
+        else
+        {
+            //時間経過落下
+            FallMino();
+        }
     }
 
     // インターフェイス継承
     public void Move(int x)
     {
-        //移動反映
-        MyTransform.position += Vector3.right * x;
-        //衝突判定があるか
-        if (CheckMino())
+        //移動先に衝突判定があるか
+        if (!CheckMinoCollision(x, 0))
         { 
-            //ある場合は元に戻す
-            MyTransform.position -= Vector3.right * x;
-            return;
+            //移動反映
+            MyTransform.position += Vector3.right * x;
+            //ステータス反映
+            MoveToChangeStatus();
         }
-        //ゴースト設定
-        _ghost.ChangeTransformGhost(MyTransform);
     }
 
     // インターフェイス継承
@@ -108,7 +126,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //スパロテ回数初期化
         _srsCnt = 0;
         //衝突判定があった場合はスーパーローテーションシステムを実行する
-        if (CheckMino())
+        if (CheckMinoCollision())
         {
             Debug.Log("srs");
             if (MyModel == IMinoCreatable.MinoType.minoI) { SRSByFour(); } //サイズが４ｘ４
@@ -122,34 +140,34 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
             _nowAngle = (int)(MyTransform.eulerAngles.z / ROTATE_VALUE); //向き取得
             return;
         }
-        //ゴースト設定
-        _ghost.ChangeTransformGhost(MyTransform);
+
+        //ステータス反映
+        MoveToChangeStatus();
     }
     
     //インターフェイス継承
     public void HardDrop()
     {
-        _myAudio.PlayOneShot(_hardDropSE); //効果音再生
-        //１列落下
-        MyTransform.position += Vector3.down;
-
-        //落下先に衝突判定がある
-        if (CheckMino())
+        //落下先に衝突判定がない
+        if (!CheckMinoCollision(0, -1))
         {
-            //もとに戻す
-            MyTransform.position += Vector3.up;
-            //ミノをフィールドに設定
-            SetMinoForField();
-            //落下タイマー初期化
-            _timer = 0;
-
-            return; //処理終了
-        }
-        else //衝突判定がない
-        {
+            //効果音再生
+            _myAudio.PlayOneShot(_hardDropSE); 
+            //１列落下
+            MyTransform.position += Vector3.down;
             //再起呼び出し
             HardDrop();
         }
+        else //ある
+        {
+            //ミノをフィールドに設定
+            SetMinoForField();
+            //落下タイマー初期化
+            _fallTimer = 0;
+
+            return; //処理終了
+        }
+
         return;
     }
 
@@ -157,29 +175,76 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     public void SoftDrop()
     {
         //タイマー倍増
-        _timer += Time.deltaTime * SOFTDROP_SPEED;
+        _fallTimer += Time.deltaTime * SOFTDROP_SPEED;
     }
 
+    //インターフェイス継承
+    public bool CheckHold()
+    {
+        //まだホールドしていない
+        if (!_isHold)
+        {
+            _isHold = true;
+            return false;
+        }
+        else
+        {
+            return true;
+        }
+    }
+
+    /// <summary>
+    /// <para>FallMino</para>
+    /// <para>ミノを一定時間毎に落下させます</para>
+    /// </summary>
     private void FallMino()
     {
-        _timer += Time.deltaTime; //タイマー加算
+        _fallTimer += Time.deltaTime; //タイマー加算
 
         //落下時間になったか
-        if(_fallTime < _timer)
+        if(_minoFallTime < _fallTimer)
         {
-            _timer = 0;
             //ミノを１マス落下
             MyTransform.position += Vector3.down;
 
-            //落下先に衝突判定がある
-            if (CheckMino())
-            {
-                //もとに戻す
-                MyTransform.position += Vector3.up;
-                //ミノをフィールドに設定
-                SetMinoForField();
-            }
+            //タイマー初期化
+            _fallTimer = 0;
         }
+    }
+
+    /// <summary>
+    /// <para>LockDown</para>
+    /// <para>ミノを設置するかの判定を行います</para>
+    /// </summary>
+    private void LockDown()
+    {
+        _waitTimer += Time.deltaTime; //タイマー加算
+
+        //設置時間になった または 回避数が最大値を超えている場合
+        if(LOCKDOWN_WAIT_TIMER <= _waitTimer || MAX_CANCEL_CNT < _lockDownCancel )
+        {
+            //ミノ設置
+            SetMinoForField();
+            //回避数初期化
+            _lockDownCancel = 0;
+            //設置待機タイマー初期化
+            _waitTimer = 0;
+        }
+    }
+
+    /// <summary>
+    /// <para>MoveToResetStatus</para>
+    /// <para>移動後に変更されるステータスの初期化・反映をします</para>
+    /// </summary>
+    private void MoveToChangeStatus()
+    {
+        //ゴースト設定
+        _ghost.ChangeTransformGhost(MyTransform);
+
+        //設置される直前だった場合、回避数をカウント
+        if (0 < _waitTimer) { _lockDownCancel++; }
+        //回避数が最大を超えていない場合、設置待機タイマーを初期化
+        if (_lockDownCancel <= MAX_CANCEL_CNT) { _waitTimer = 0; }
     }
 
     /// <summary>
@@ -236,7 +301,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
                 return; //現条件終了
         }
         _srsCnt++; //スパロテ記録
-        if (CheckMino()) { SRSByThree(); } //衝突判定があった場合、スパロテ継続
+        if (CheckMinoCollision()) { SRSByThree(); } //衝突判定があった場合、スパロテ継続
         return;
     }
 
@@ -424,7 +489,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
                 return; //現条件終了
         }
         _srsCnt++; //スパロテ記録
-        if (CheckMino()) { SRSByFour(); } //衝突判定があった場合、スパロテ継続
+        if (CheckMinoCollision()) { SRSByFour(); } //衝突判定があった場合、スパロテ継続
         return;
     }
 
@@ -448,9 +513,11 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         _ghost.ChangeModelGhost(MyModel, MyTransform.position);
 
         //生成位置にミノが既にあるか
-        if (CheckMino())
+        if (CheckMinoCollision())
         {
-
+            Debug.Log("MinoCantPlay");
+            //プレイ不可能
+            NotPlay();
         }
     }
     #endregion

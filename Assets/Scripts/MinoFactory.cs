@@ -29,6 +29,9 @@ public class MinoFactory : MonoBehaviour
     //生成可能なミノ形を保存するリスト
     private List<IMinoCreatable.MinoType> _canCreateModels = new();
     private int _createModelIndex = 0; //生成するミノ形のインデックス
+
+    [SerializeField]
+    private bool _onDebug = false;
     #endregion
 
     #region プロパティ
@@ -70,6 +73,7 @@ public class MinoFactory : MonoBehaviour
     /// </summary>
     public void CreateMino()
     {
+        if (_onDebug) { DebugView(); }
         //生成可能なミノ形が存在しない
         if(_canCreateModels.Count == 0)
         {
@@ -83,6 +87,19 @@ public class MinoFactory : MonoBehaviour
         _minoCreator.CreateMinoUnit(_minoManager.GetUseableMino(), _canCreateModels[_createModelIndex]);
         //生成したミノ形をリストから除外
         _canCreateModels.RemoveAt(_createModelIndex);
+    }
+
+    /// <summary>
+    /// <para>DebugView</para>
+    /// <para>デバッグ表示</para>
+    /// </summary>
+    void DebugView()
+    {
+        Debug.Log("----------");
+        for (int i = 0; i < _canCreateModels.Count; i++)
+        {
+            Debug.Log(_canCreateModels[i]);
+        }
     }
     #endregion
 }

@@ -34,11 +34,13 @@ public class FieldManager : MonoBehaviour, IFieldAccess
 
     [SerializeField, Tooltip("ライン消去エフェクト")]
     private LineEffect[] _deleteLineEfe = default;
+    [SerializeField, Tooltip("テトリステキスト")]
+    private TetrisEffect _tetrisText = default;
     [SerializeField, Tooltip("ライン消去SE 0:通常 1:テトリス")]
     private AudioClip[] _deleteLineSE = default;
     private AudioSource _myAudio = default; //自身のAudioSource
 
-    private ScoreManager _scoreSystem = default;
+    private ScoreManager _scoreManager = default; //スコア管理マネージャー
     #endregion
 
     #region メソッド
@@ -47,6 +49,7 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     /// </summary>
     void Awake()
     {
+        _canPlay = true;
         //マップ初期化
         for(int y = 0; y < FIELD_MAX_HEIGHT; y++) //縦軸
         {
@@ -71,7 +74,7 @@ public class FieldManager : MonoBehaviour, IFieldAccess
         _deleteLineIndexs.Clear();
 
         _myAudio = GetComponent<AudioSource>();
-        _scoreSystem = GetComponent<ScoreManager>();
+        _scoreManager = GetComponent<ScoreManager>();
     }
 
     /// <summary>
@@ -130,14 +133,17 @@ public class FieldManager : MonoBehaviour, IFieldAccess
         {
             //効果音
             _myAudio.PlayOneShot(_deleteLineSE[_deleteLineIndexs.Count / TETRIS_LINE]);
+
             //列ごとにエフェクト
             for(int i = 0; i < _deleteLineIndexs.Count; i++) { _deleteLineEfe[i].SetEffect(_deleteLineIndexs[i]); }
+            //4列の場合はテトリスエフェクト (引数としては一番上の列を渡す)
+            if(_deleteLineIndexs.Count == TETRIS_LINE) { _tetrisText.SetView(); }
 
             //削除処理を行う
             DeleteLine();
 
             //スコア加算
-            _scoreSystem.AddScore(_deleteLineIndexs.Count);
+            _scoreManager.AddScore(_deleteLineIndexs.Count);
         }
 
         return;
