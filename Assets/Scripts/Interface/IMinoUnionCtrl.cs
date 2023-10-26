@@ -40,5 +40,5 @@ public interface IMinoUnionCtrl
     /// <para>MinoHold</para>
     /// <para>ミノをホールド設定します</para>
     /// </summary>
-    bool CheckHold();
+    bool CheckHasHold();
 }

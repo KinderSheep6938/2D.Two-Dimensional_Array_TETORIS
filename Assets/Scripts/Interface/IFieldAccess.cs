@@ -10,6 +10,8 @@ using UnityEngine;
 
 public interface IFieldAccess
 {
+    bool TSpin { set; }
+
     /// <summary>
     /// <para>CheckAlreadyMinoExist</para>
     /// <para>w’è‚µ‚½À•W‚ª‹ó”’‚©‚Ç‚¤‚©ŒŸ¸‚µ‚Ü‚·</para>

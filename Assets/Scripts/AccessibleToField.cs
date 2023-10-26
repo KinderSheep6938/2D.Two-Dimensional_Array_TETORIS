@@ -20,6 +20,24 @@ public class AccessibleToField : MinoModelGeneration
 
     #region メソッド
     /// <summary>
+    /// <para>CheckCollisionByCenter</para>
+    /// <para>ミノ軸を中心に衝突判定をチェックします</para>
+    /// <para>増分がある場合は、中心＋増分の座標を検査します</para>
+    /// </summary>
+    /// <param name="x">横軸増分</param>
+    /// <param name="y">縦軸増分</param>
+    /// <returns>衝突判定</returns>
+    public bool CheckCollisionByCenter(int x,int y)
+    {
+        //フィールド管理システムを取得していない
+        if (_fieldCtrl == default) { _fieldCtrl = FindObjectOfType<FieldManager>().GetComponent<IFieldAccess>(); /*取得*/}
+
+        //空白ではない
+        if (_fieldCtrl.CheckAlreadyMinoExist(x, y)) { return true; }
+        //空白である
+        return false;
+    }
+    /// <summary>
     /// <para>CheckMino</para>
     /// <para>ミノブロックの衝突をチェックします</para>
     /// </summary>
@@ -60,7 +78,6 @@ public class AccessibleToField : MinoModelGeneration
         return false;
     }
 
-
     /// <summary>
     /// <para>SetMinoForField</para>
     /// <para>ミノをフィールドにセットします</para>
@@ -84,6 +101,17 @@ public class AccessibleToField : MinoModelGeneration
     {
         //プレイ不可能状態を設定
         _fieldCtrl.NotPlayable();
+    }
+
+    /// <summary>
+    /// <para>SetTSpin</para>
+    /// <para>Tスピン判定を設定します</para>
+    /// </summary>
+    /// <param name="flag"></param>
+    public void SetTSpin(bool flag)
+    {
+        //判定設定
+        _fieldCtrl.TSpin = flag;
     }
     #endregion
 }

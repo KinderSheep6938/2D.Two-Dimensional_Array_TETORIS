@@ -19,6 +19,9 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private const int TILE_MINO_ID = 1; //ミノID
     private const int MAX_COMMITMINO_CNT = 4; //操作ミノの数
     private const int TETRIS_LINE = 4; //テトリス判定ライン数
+    private const int GAMEEND_ID = -1; //ゲーム不可能状態ID
+    private const int PLAYING_ID = 0; //プレイ中状態ID
+    private const int COMMIT_ID = 1; //操作完了状態ID
 
     [SerializeField,Tooltip("空白タイル")]
     private GameObject _fieldTileObj = default; //空白タイル
@@ -31,6 +34,7 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private int _fallValue = 0; //ライン削除の落下距離
     private int _commitCnt = 0; //設置した操作ミノブロックの数
     private bool _canPlay = true; //フィールドでのプレイ可否判定
+    private bool _tSpin = false; //Tスピン判定
 
     [SerializeField, Tooltip("ライン消去エフェクト")]
     private LineEffect[] _deleteLineEfe = default;
@@ -41,6 +45,10 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private AudioSource _myAudio = default; //自身のAudioSource
 
     private ScoreManager _scoreManager = default; //スコア管理マネージャー
+    #endregion
+
+    #region プロパティ
+    public bool TSpin { set => _tSpin = value; }
     #endregion
 
     #region メソッド
@@ -193,7 +201,6 @@ public class FieldManager : MonoBehaviour, IFieldAccess
         {
             lineMino.LineCtrl(_deleteLineIndexs);
         }
-        Debug.Log("------------");
         return;
     }
 
@@ -208,7 +215,7 @@ public class FieldManager : MonoBehaviour, IFieldAccess
         if (!_canPlay)
         {
             //プレイが不可能であることを返す
-            return -1;
+            return GAMEEND_ID;
         }
 
         //設置した回数 が 操作可能なミノの最大数 より多いか
@@ -217,11 +224,11 @@ public class FieldManager : MonoBehaviour, IFieldAccess
             //カウントリセット
             _commitCnt = 0;
             //設置が完了していることを返す
-            return 1;
+            return COMMIT_ID;
         }
 
         //まだ操作している
-        return 0;
+        return PLAYING_ID;
     }
     
     //インターフェイス継承

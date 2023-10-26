@@ -59,19 +59,18 @@ public class PlayerInput : MonoBehaviour
     /// </summary>
     private void PlayerIO()
     {
-        //移動
+        //横移動入力
         InputMoveButton();
-        //左回転
-        if (Input.GetKeyDown(KeyCode.Q)) { _minoUnion.Rotate(-1); }
-        //右回転
-        if (Input.GetKeyDown(KeyCode.E)) { _minoUnion.Rotate(1); }
-        //ハードドロップ
+        //左回転操作
+        if (Input.GetKeyDown(KeyCode.Q) || Input.GetAxis("Horizontal") < 0) { _minoUnion.Rotate(-1); }
+        //右回転操作
+        if (Input.GetKeyDown(KeyCode.E) || Input.GetAxis("Horizontal") > 0) { _minoUnion.Rotate(1); }
+        //ハードドロップ操作
         if (Input.GetKeyDown(KeyCode.W)) { _minoUnion.HardDrop(); }
-        //ソフトドロップ
+        //ソフトドロップ操作
         if (Input.GetKey(KeyCode.S)) { _minoUnion.SoftDrop(); }
-        //ホールド
-        //まだホールドをしていない場合のみ発動
-        if (Input.GetKeyDown(KeyCode.LeftShift) && _minoUnion.CheckHold()) { _holdSystem.Hold(); }
+        //ホールド操作 -> ホールドがないか
+        if (Input.GetKeyDown(KeyCode.LeftShift)) { if (!_minoUnion.CheckHasHold()) { _holdSystem.Hold(); } }
     }
 
     /// <summary>

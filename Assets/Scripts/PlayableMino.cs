@@ -109,6 +109,8 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
             MyTransform.position += Vector3.right * x;
             //ステータス反映
             MoveToChangeStatus();
+            //回転方向消去
+            _moveDire = 0;
         }
     }
 
@@ -138,6 +140,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         {
             MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * -angle; //角度戻す
             _nowAngle = (int)(MyTransform.eulerAngles.z / ROTATE_VALUE); //向き取得
+            _moveDire = 0; //回転方向消去
             return;
         }
 
@@ -160,10 +163,8 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         }
         else //ある
         {
-            //ミノをフィールドに設定
-            SetMinoForField();
-            //落下タイマー初期化
-            _fallTimer = 0;
+            //コミット
+            Commit();
 
             return; //処理終了
         }
@@ -179,17 +180,18 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     }
 
     //インターフェイス継承
-    public bool CheckHold()
+    public bool CheckHasHold()
     {
+        Debug.Log(_isHold);
         //まだホールドしていない
         if (!_isHold)
         {
-            _isHold = true;
-            return false;
+            _isHold = true; //ホールドすることを記録
+            return false; //まだホールドしていないことを送信
         }
         else
         {
-            return true;
+            return true; //ホールド済みであることを送信
         }
     }
 
@@ -223,12 +225,8 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //設置時間になった または 回避数が最大値を超えている場合
         if(LOCKDOWN_WAIT_TIMER <= _waitTimer || MAX_CANCEL_CNT < _lockDownCancel )
         {
-            //ミノ設置
-            SetMinoForField();
-            //回避数初期化
-            _lockDownCancel = 0;
-            //設置待機タイマー初期化
-            _waitTimer = 0;
+            //コミット
+            Commit();
         }
     }
 
@@ -245,6 +243,39 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         if (0 < _waitTimer) { _lockDownCancel++; }
         //回避数が最大を超えていない場合、設置待機タイマーを初期化
         if (_lockDownCancel <= MAX_CANCEL_CNT) { _waitTimer = 0; }
+    
+    }
+
+    /// <summary>
+    /// <para>Commit</para>
+    /// <para>操作を完了します</para>
+    /// </summary>
+    private void Commit()
+    {
+        //Tミノである場合はTスピン検査を行う
+        //条件１ : Tミノである (1行目最初)
+        //条件２ : 最後の動作が回転である (1行目最後)
+        //条件３ : 軸を中心とした３ｘ３の４つの角に衝突判定がある (2行目)
+        //すべての条件が合致した場合は、Tスピン判定を設定する
+        if(MyModel == IMinoCreatable.MinoType.minoT && _moveDire != 0
+            && CheckCollisionByCenter(1,1) && CheckCollisionByCenter(-1, 1) && CheckCollisionByCenter(-1, -1) && CheckCollisionByCenter(1, -1))
+        {
+            SetTSpin(true); //Tスピンとして設定
+        }
+        else
+        {
+            SetTSpin(false); //別物として設定
+        }
+        //ミノ設置
+        SetMinoForField();
+        //回避数初期化
+        _lockDownCancel = 0;
+        //設置待機タイマー初期化
+        _waitTimer = 0;
+        //タイマー初期化
+        _fallTimer = 0;
+        //ホールド判定
+        _isHold = false;
     }
 
     /// <summary>
