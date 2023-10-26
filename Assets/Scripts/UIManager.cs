@@ -12,9 +12,9 @@ using UnityEngine.UI;
 public class UIManager : MonoBehaviour
 {
     #region 変数
-    [SerializeField,Tooltip("スコア表示テキスト")]
+    [SerializeField,Header("スコア表示テキスト")]
     private Text _scoreText = default;
-    [SerializeField,Tooltip("レベル表示テキスト")]
+    [SerializeField,Header("レベル表示テキスト")]
     private Text _levelText = default;
 
     private ScoreManager _scoreManager = default; //スコア管理クラス

@@ -35,18 +35,18 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private bool _canPlay = true; //フィールドでのプレイ可否判定
     private bool _tSpin = false; //Tスピン判定
 
-    [SerializeField, Tooltip("空白タイル")]
+    [SerializeField, Header("空白タイル")]
     private GameObject _fieldTileObj = default; //空白タイル
-    [SerializeField, Tooltip("フィールド管理オブジェクト")]
+    [SerializeField, Header("フィールド管理オブジェクト")]
     private Transform _fieldParent = default; //フィールド管理オブジェ
 
-    [SerializeField, Tooltip("ライン消去エフェクト")]
+    [SerializeField, Header("ライン消去エフェクト")]
     private LineEffect[] _deleteLineEfe = default;
-    [SerializeField, Tooltip("テトリステキスト")]
+    [SerializeField, Header("テトリステキスト")]
     private TextEffect _tetrisText = default;
-    [SerializeField, Tooltip("Tスピンテキスト")]
+    [SerializeField, Header("Tスピンテキスト")]
     private TextEffect _tSpinText = default;
-    [SerializeField, Tooltip("ライン消去SE 0:通常 1:テトリス")]
+    [SerializeField, Header("ライン消去SE 0:通常 1:テトリス")]
     private AudioClip[] _deleteLineSE = default;
     private AudioSource _myAudio = default; //自身のAudioSource
 

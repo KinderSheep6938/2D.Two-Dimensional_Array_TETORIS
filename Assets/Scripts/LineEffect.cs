@@ -13,8 +13,8 @@ public class LineEffect : MonoBehaviour
     #region 変数
     private readonly Vector3 _effectWidthPos = new Vector3(4.5f, 0, 0); //エフェクト発生位置の横軸
 
-    private Transform _transform = default;
-    private ParticleSystem _particleSystem = default; //パーティクルシステム
+    private Transform _transform = default; //自身のTransform
+    private ParticleSystem _particleSystem = default; //自身のParticleSystem
     #endregion
 
     #region プロパティ

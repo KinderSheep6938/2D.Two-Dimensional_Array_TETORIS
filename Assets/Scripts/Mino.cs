@@ -11,11 +11,11 @@ using UnityEngine;
 public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
 {
     #region 変数
-    private int _deleteLineIndex = default;
+    private int _deleteLineCnt = default; //削除ラインカウント
 
-    private MinoPoolManager minoManager = default;
-    private SpriteRenderer _myRen = default;
-    private Transform _transform = default;
+    private MinoPoolManager minoManager = default; //ミノ管理マネージャー
+    private SpriteRenderer _myRen = default; //自身のSpriteRenderer
+    private Transform _transform = default; //自身のTransform
     #endregion
 
     #region プロパティ
@@ -56,6 +56,7 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
     //インターフェイス継承
     public void ChangeColor(Color minoColor)
     {
+        //色変更
         _myRen.color = minoColor;
         return;
     }
@@ -90,31 +91,31 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
         if (deleteLineHeights.Contains(MinoY)) { DeleteMino(); }
 
         //削除対象のラインに応じて、落下処理を行います
-        for (_deleteLineIndex = 0; _deleteLineIndex < deleteLineHeights.Count; _deleteLineIndex++)
+        for (_deleteLineCnt = 0; _deleteLineCnt < deleteLineHeights.Count; _deleteLineCnt++)
         {
             //現在の落下対象ライン以下 かつ １番下層のラインである
-            if(MinoY <= deleteLineHeights[_deleteLineIndex] && _deleteLineIndex == 0)
+            if(MinoY <= deleteLineHeights[_deleteLineCnt] && _deleteLineCnt == 0)
             {
                 //何もしない
                 return;
             }
 
             //現在の落下対象ライン以下である（１番下層のラインではない）
-            if(MinoY <= deleteLineHeights[_deleteLineIndex])
+            if(MinoY <= deleteLineHeights[_deleteLineCnt])
             {
-                DownMino(_deleteLineIndex);
+                DownMino(_deleteLineCnt);
                 return;
             }
 
             //現在の落下対象ラインより上
-            if(deleteLineHeights[_deleteLineIndex] < MinoY)
+            if(deleteLineHeights[_deleteLineCnt] < MinoY)
             {
                 //次の落下対象ラインと比較
                 continue;
             }
         }
         //全ての落下対象ラインより上にある
-        DownMino(_deleteLineIndex);
+        DownMino(_deleteLineCnt);
         return;
     }
 

@@ -25,7 +25,7 @@ public class ScoreManager : MonoBehaviour
     private int _oldLevel = 0; //レベル上昇検査用
 
 
-    [SerializeField, Tooltip("操作ミノ")]
+    [SerializeField, Header("操作ミノ")]
     private PlayableMino _playableMino = default;
     #endregion
 

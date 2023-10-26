@@ -22,6 +22,8 @@ public class PlayerInput : MonoBehaviour
 
     private bool _isSoft = false; //ソフトドロップ開始判定
 
+    private bool _canGame = false; //ゲームプレイ可能フラグ
+
     private IMinoUnionCtrl _minoUnion = default; //ミノ操作システムのインターフェイス
     private IMinoHoldable _holdSystem = default; //ホールドシステムのインターフェイス
     #endregion
@@ -66,6 +68,8 @@ public class PlayerInput : MonoBehaviour
     /// <param name="context">ボタン状態</param>
     public void OnMoveLeft(InputAction.CallbackContext context)
     {
+        if (!_canGame) { return; /*まだ開始していない*/ }
+
         if (context.phase == InputActionPhase.Started) //押された
         {
             _minoUnion.Move(LEFT_DIREID);
@@ -93,6 +97,8 @@ public class PlayerInput : MonoBehaviour
     /// <param name="context">ボタン状態</param>
     public void OnMoveRight(InputAction.CallbackContext context)
     {
+        if (!_canGame) { return; /*まだ開始していない*/ }
+
         if (context.phase == InputActionPhase.Started) //押された
         {
             _minoUnion.Move(RIGHT_DIREID);
@@ -120,6 +126,8 @@ public class PlayerInput : MonoBehaviour
     /// <param name="context">ボタン状態</param>
     public void OnRotateLeft(InputAction.CallbackContext context)
     {
+        if (!_canGame) { return; /*まだ開始していない*/ }
+
         if (context.phase == InputActionPhase.Performed) //押された
         {
             _minoUnion.Rotate(LEFT_DIREID);
@@ -133,6 +141,8 @@ public class PlayerInput : MonoBehaviour
     /// <param name="context">ボタン状態</param>
     public void OnRotateRight(InputAction.CallbackContext context)
     {
+        if (!_canGame) { return; /*まだ開始していない*/ }
+
         if (context.phase == InputActionPhase.Performed) //押された
         {
             _minoUnion.Rotate(RIGHT_DIREID);
@@ -146,6 +156,8 @@ public class PlayerInput : MonoBehaviour
     /// <param name="context">ボタン状態</param>
     public void OnHardDrop(InputAction.CallbackContext context)
     {
+        if (!_canGame) { return; /*まだ開始していない*/ }
+
         if (context.phase == InputActionPhase.Performed) //押された
         {
             _minoUnion.HardDrop();
@@ -159,6 +171,8 @@ public class PlayerInput : MonoBehaviour
     /// <param name="context">ボタン状態</param>
     public void OnSoftDrop(InputAction.CallbackContext context)
     {
+        if (!_canGame) { return; /*まだ開始していない*/ }
+
         if (context.phase == InputActionPhase.Started) //押された
         {
             _isSoft = true;
@@ -177,6 +191,8 @@ public class PlayerInput : MonoBehaviour
     /// <param name="context">ボタン状態</param>
     public void OnHold(InputAction.CallbackContext context)
     {
+        if (!_canGame) { return; /*まだ開始していない*/ }
+
         if (context.phase == InputActionPhase.Performed)
         {
             //ホールドがない場合は、ホールドする
@@ -185,44 +201,16 @@ public class PlayerInput : MonoBehaviour
     }
 
     /// <summary>
-    /// <para>PlayerIO</para>
-    /// <para>プレイヤーの入力に応じて、ミノを操作します</para>
+    /// <para>OnStart</para>
+    /// <para>開始ボタンが押されたときに呼ばれます</para>
     /// </summary>
-    private void PlayerIO()
+    /// <param name="context">ボタン状態</param>
+    public void OnStart(InputAction.CallbackContext context)
     {
-        //横移動入力
-        InputMoveButton();
-        //左回転操作
-        if (Input.GetKeyDown(KeyCode.Q) || Input.GetAxis("Horizontal") < 0) { _minoUnion.Rotate(-1); }
-        //右回転操作
-        if (Input.GetKeyDown(KeyCode.E) || Input.GetAxis("Horizontal") > 0) { _minoUnion.Rotate(1); }
-        //ハードドロップ操作
-        if (Input.GetKeyDown(KeyCode.W)) { _minoUnion.HardDrop(); }
-        //ソフトドロップ操作
-        if (Input.GetKey(KeyCode.S)) { _minoUnion.SoftDrop(); }
-        //ホールド操作 -> ホールドがないか
-        if (Input.GetKeyDown(KeyCode.LeftShift)) { if (!_minoUnion.CheckHasHold()) { _holdSystem.Hold(); } }
-    }
-
-    /// <summary>
-    /// <para>InputMoveButton</para>
-    /// <para>横移動入力の制御を行います</para>
-    /// </summary>
-    private void InputMoveButton()
-    {
-        //左移動
-        if (Input.GetKey(KeyCode.A))
+        if (context.phase == InputActionPhase.Performed)
         {
-            AutoRepeat(-1);
-            return;
+            _canGame = true;
         }
-        //右移動
-        if (Input.GetKey(KeyCode.D))
-        {
-            AutoRepeat(1);
-            return;
-        }
-        AutoRepeatReset();
     }
 
     /// <summary>

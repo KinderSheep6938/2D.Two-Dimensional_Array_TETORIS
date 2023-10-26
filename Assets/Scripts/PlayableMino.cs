@@ -55,9 +55,11 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     //ホールド判定
     private bool _isHold = false;
 
-    [SerializeField, Tooltip("回転SE")]
+    [SerializeField, Header("回転SE")]
     private AudioClip _rotateSE = default;
-    [SerializeField, Tooltip("ハードドロップSE")]
+    [SerializeField, Header("TスピンSE")]
+    private AudioClip _tSpinSE = default;
+    [SerializeField, Header("ハードドロップSE")]
     private AudioClip _hardDropSE = default;
     private AudioSource _myAudio = default; //自身のAudioSource
     private IGhostStartable _ghost = default; //ゴーストシステム
@@ -90,7 +92,10 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     /// </summary>
     void Update()
     {
-        //ミノブロックが渡されている（子付けされている）
+        //ミノ生成されていない
+        if(MyTransform == default) { return; }
+
+        //ミノブロックが渡されていない（子付けされていない）
         if (MyTransform.childCount == 0) { return; }
 
         if (CheckMinoCollision(0, -1))
@@ -123,11 +128,12 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     // インターフェイス継承
     public void Rotate(int angle)
     {
-        _myAudio.PlayOneShot(_rotateSE); //効果音再生
+
         //回転反映
         MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * angle;
-
-        _nowAngle = (int)(MyTransform.eulerAngles.z / ROTATE_VALUE); //向き取得
+        
+        //正規化取得
+        _nowAngle = GetAngleID(MyTransform.eulerAngles.z); //向き取得
         _moveDire = angle; //回転方向取得
         _needReturn = false; //回転可能
 
@@ -144,14 +150,42 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //スパロテができない場合は角度を戻す
         if (_needReturn)
         {
-            MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * -angle; //角度戻す
-            _nowAngle = (int)(MyTransform.eulerAngles.z / ROTATE_VALUE); //向き取得
+            //角度を戻す
+            MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * -angle; 
+            _nowAngle = GetAngleID(MyTransform.eulerAngles.z); //向き取得
             _moveDire = 0; //回転方向消去
             return;
         }
 
+        //Tスピン判定がある場合は、効果音を変える
+        if(MyModel == IMinoCreatable.MinoType.minoT && EdgeCollisionByTSpin())
+        {
+            _myAudio.PlayOneShot(_tSpinSE); //Tスピン効果音再生
+        }
+        else
+        {
+            _myAudio.PlayOneShot(_rotateSE); //通常効果音再生
+        }
+
         //ステータス反映
         MoveToChangeStatus();
+    }
+
+    /// <summary>
+    /// <para>GetAngleID</para>
+    /// <para>角度から角度IDを取得します</para>
+    /// </summary>
+    /// <param name="angle">操作ミノの角度</param>
+    /// <returns>角度ID</returns>
+    public int GetAngleID(float angle)
+    {
+        //角度は全てマイナス方向に調整した状態にする
+        //角度がプラスである
+        if(0 < angle)
+        {
+            return (int)((angle - 360f) / ROTATE_VALUE) * -1;
+        }
+        return (int)(angle / ROTATE_VALUE) * -1;
     }
     
     //インターフェイス継承
@@ -160,8 +194,9 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //落下先に衝突判定がない
         if (!CheckMinoCollision(0, -1))
         {
-            //効果音再生
-            _myAudio.PlayOneShot(_hardDropSE); 
+            //回転方向消去
+            _moveDire = 0;
+
             //１列落下
             MyTransform.position += Vector3.down;
             //再起呼び出し
@@ -169,6 +204,8 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         }
         else //ある
         {
+            //効果音再生
+            _myAudio.PlayOneShot(_hardDropSE);
             //コミット
             Commit();
 
@@ -188,7 +225,6 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     //インターフェイス継承
     public bool CheckHasHold()
     {
-        Debug.Log(_isHold);
         //まだホールドしていない
         if (!_isHold)
         {
@@ -212,6 +248,9 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //落下時間になったか
         if(_minoFallTime < _fallTimer)
         {
+            //回転方向消去
+            _moveDire = 0;
+
             //ミノを１マス落下
             MyTransform.position += Vector3.down;
 
@@ -258,9 +297,9 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     /// </summary>
     private void Commit()
     {
-        //Tミノである場合はTスピン検査を行う
+        //Tスピン検査を行う
         //ミニTスピンは今回の場合はTスピンではないものとして扱う
-        if(MyModel == IMinoCreatable.MinoType.minoT && JudgeTSpin())
+        if(JudgeTSpin())
         {
             SetTSpin(true); //Tスピンとして設定
         }
@@ -287,16 +326,12 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     /// <returns>Tスピン判定</returns>
     private bool JudgeTSpin()
     {
+        //前提：Tミノではない
+        if(MyModel != IMinoCreatable.MinoType.minoT) { return false; }
+
         //条件１：軸を中心とした３ｘ３の４つの隅に衝突判定がある
-        //隅衝突判定カウント用
-        int collisionCnt = 0;
-        //隅判定
-        if(CheckCollisionByCenter(1, 1)) { collisionCnt++; }
-        if(CheckCollisionByCenter(-1, 1)) { collisionCnt++; }
-        if(CheckCollisionByCenter(1, -1)) { collisionCnt++; }
-        if(CheckCollisionByCenter(-1, -1)) { collisionCnt++; }
         //判定のあった隅がTスピン判定値より小さい場合は、Tスピンではない
-        if (collisionCnt < TSPIN_JUDGE_CNT) { return false; }
+        if (EdgeCollisionByTSpin()) { return false; }
 
         //条件２：最後の動作が回転である
         //回転でない場合は、Tスピンではない
@@ -315,6 +350,26 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //すべての条件に合致する場合は、Tスピンである
         return true;
 
+    }
+    
+    /// <summary>
+    /// <para>EdgeCollisionByTSpin</para>
+    /// <para>隅の衝突判定が3つ以上ある場合、Trueを返します</para>
+    /// </summary>
+    /// <returns></returns>
+    private bool EdgeCollisionByTSpin()
+    {
+        //隅衝突判定カウント用
+        int collisionCnt = 0;
+        //隅判定
+        if (CheckCollisionByCenter(1, 1)) { collisionCnt++; }
+        if (CheckCollisionByCenter(-1, 1)) { collisionCnt++; }
+        if (CheckCollisionByCenter(1, -1)) { collisionCnt++; }
+        if (CheckCollisionByCenter(-1, -1)) { collisionCnt++; }
+        //3つ以上ある場合はTrue
+        if (TSPIN_JUDGE_CNT <= collisionCnt) { return true; }
+
+        return false; //3つに満たさない
     }
 
     /// <summary>
