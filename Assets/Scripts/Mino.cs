@@ -16,12 +16,12 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
     private MinoPoolManager minoManager = default; //ミノ管理マネージャー
     private SpriteRenderer _myRen = default; //自身のSpriteRenderer
     private Transform _transform = default; //自身のTransform
+    private IMinoBlockAccessible _myBlock = default; //自身のブロック情報
     #endregion
 
     #region プロパティ
     public int MinoX { get => Mathf.RoundToInt(_transform.position.x); }
     public int MinoY { get => Mathf.RoundToInt(_transform.position.y); }
-    
     #endregion
 
     #region メソッド
@@ -34,14 +34,7 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
         minoManager = FindObjectOfType<MinoPoolManager>().GetComponent<MinoPoolManager>();
         _transform = transform;
         _myRen = GetComponent<SpriteRenderer>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
+        _myBlock = GetComponent<IMinoBlockAccessible>();
     }
 
     /// <summary>
@@ -80,12 +73,26 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
             Vector3.right * Mathf.RoundToInt(_transform.position.x) +
             Vector3.up * Mathf.RoundToInt(_transform.position.y);
     }
+    
+    //インターフェイス継承
+    public void SetMinoView(bool canShow)
+    {
+        //表示
+        if (canShow)
+        {
+            gameObject.SetActive(true);
+        }
+        else
+        { //非表示
+            gameObject.SetActive(false);
+        }
+    }
 
     //インターフェイス継承
     public void LineCtrl(List<int> deleteLineHeights)
     {
-        //ホールド中のミノは無視する
-        if (_transform.parent != null) { return; }
+        //ホールド中のミノ または 非表示のミノ は無視する
+        if (_transform.parent != null || !_myRen.enabled ) { return; }
 
         //削除対象のラインにある場合、削除する
         if (deleteLineHeights.Contains(MinoY)) { DeleteMino(); }
@@ -136,7 +143,7 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
     /// </summary>
     private void DeleteMino()
     {
-        minoManager.EndUseableMino(gameObject);
+        minoManager.EndUseableMino(_myBlock);
         return;
     }
     #endregion

@@ -11,25 +11,14 @@ using UnityEngine.Events;
 
 public class GhostMino : AccessibleToField, IGhostStartable
 {
-    #region 変数
-
-    #endregion
-
-    #region プロパティ
-
-    #endregion
-
     #region メソッド
     /// <summary>
     /// 初期化処理
     /// </summary>
     void Awake()
     {
-        //ミノブロック初期化
-        CreateMinoUnit(GetComponentsInChildren<IMinoBlockAccessible>(), IMinoCreatable.MinoType.minoT);
-
-        //ゴースト落とす
-        Drop();
+        //軸に子付け
+        Minos = GetComponentsInChildren<IMinoBlockAccessible>();
     }
 
     //インターフェイス継承

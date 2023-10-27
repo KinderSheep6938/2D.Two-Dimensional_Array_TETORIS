@@ -87,24 +87,8 @@ public class FieldManager : MonoBehaviour, IFieldAccess
         //ライン検査初期化
         _deleteLineIndexs.Clear();
 
-        _myAudio = GetComponent<AudioSource>();
-        _scoreManager = GetComponent<ScoreManager>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-        
-    }
-
-    /// <summary>
-    /// 更新処理
-    /// </summary>
-    void Update()
-    {
-        
+        _myAudio = GetComponent<AudioSource>(); //サウンド
+        _scoreManager = GetComponent<ScoreManager>(); //スコアマネージャー
     }
 
     /// <summary>

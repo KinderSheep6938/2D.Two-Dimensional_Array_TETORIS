@@ -56,12 +56,22 @@ public class ScoreManager : MonoBehaviour
         }
     }
 
+    /// <summary>
+    /// <para>LevelOfFallTime</para>
+    /// <para>レベルに応じた落下時間を取得する</para>
+    /// </summary>
+    /// <returns>レベルに対応した落下時間</returns>
     private float LevelOfFallTime()
     {
+        //レベルが最小落下時間レベル以下である
         if(Level < MINFALLTIME_LEVEL)
         {
+            //対応したレベルの落下時間を返す
+            //対応した落下時間 ＝ 基礎落下時間 - (レベル毎の減少時間量 * 現在のレベル)
             return BASE_FALLTIME - _levelUpRatio * Level;
         }
+
+        //最小落下時間を返す
         return MAXLEVEL_FALLTIME;
     }
     #endregion

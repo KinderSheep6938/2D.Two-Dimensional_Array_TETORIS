@@ -17,10 +17,6 @@ public class NextMino : MinoModelGeneration
     private bool isSet = false;
     #endregion
 
-    #region プロパティ
-
-    #endregion
-
     #region メソッド
     /// <summary>
     /// 初期化処理
@@ -28,22 +24,6 @@ public class NextMino : MinoModelGeneration
     void Awake()
     {
         _playableMino = GameObject.FindGameObjectWithTag(PLAYABLEMINO_TAG).GetComponent<IMinoCreatable>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
-    }
-
-    /// <summary>
-    /// 更新処理
-    /// </summary>
-    void Update()
-    {
-
     }
 
     //クラス継承

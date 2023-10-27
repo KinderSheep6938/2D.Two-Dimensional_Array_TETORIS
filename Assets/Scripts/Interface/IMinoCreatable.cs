@@ -26,9 +26,9 @@ public interface IMinoCreatable
         minoI
     }
 
-    MinoType MyModel { get; }
+    MinoType MyModel { get; } //自身のミノ形
 
-    IMinoBlockAccessible[] Minos { get; }
+    IMinoBlockAccessible[] Minos { get; } //自身のミノブロック
 
     /// <summary>
     /// <para>CreateMinoUnit</para>

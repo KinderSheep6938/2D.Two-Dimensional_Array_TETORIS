@@ -19,10 +19,6 @@ public class TextEffect : MonoBehaviour
     private Text _viewText = default; //表示テキスト
     #endregion
 
-    #region プロパティ
-
-    #endregion
-
     #region メソッド
     /// <summary>
     /// 初期化処理
@@ -30,14 +26,6 @@ public class TextEffect : MonoBehaviour
     void Awake()
     {
         _viewText = GetComponent<Text>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
     }
 
     /// <summary>

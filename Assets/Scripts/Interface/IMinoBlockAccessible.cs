@@ -10,8 +10,10 @@ using UnityEngine;
 
 public interface IMinoBlockAccessible
 {
-    int MinoX { get; }
-    int MinoY { get; }
+
+    int MinoX { get; } //自身の横軸座標
+
+    int MinoY { get; } //自身の縦軸座標
 
     /// <summary>
     /// <para>ChangeColor</para>
@@ -35,4 +37,11 @@ public interface IMinoBlockAccessible
     /// <para>ミノ軸との接続を切断します</para>
     /// </summary>
     void DisConnect();
+
+    /// <summary>
+    /// <para>SetMinoView</para>
+    /// <para>ミノブロックの表示状態を設定します</para>
+    /// </summary>
+    /// <param name="canShow">表示設定</param>
+    void SetMinoView(bool canShow);
 }

@@ -22,14 +22,11 @@ public class PlayerInput : MonoBehaviour
 
     private bool _isSoft = false; //ソフトドロップ開始判定
 
+    private bool _isStart = false; //ゲーム開始フラグ
     private bool _canGame = false; //ゲームプレイ可能フラグ
 
     private IMinoUnionCtrl _minoUnion = default; //ミノ操作システムのインターフェイス
     private IMinoHoldable _holdSystem = default; //ホールドシステムのインターフェイス
-    #endregion
-
-    #region プロパティ
-
     #endregion
 
     #region メソッド
@@ -40,14 +37,6 @@ public class PlayerInput : MonoBehaviour
     {
         _minoUnion = GetComponent<IMinoUnionCtrl>();
         _holdSystem = FindObjectOfType<HoldMino>().GetComponent<IMinoHoldable>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
     }
 
     /// <summary>
@@ -207,9 +196,11 @@ public class PlayerInput : MonoBehaviour
     /// <param name="context">ボタン状態</param>
     public void OnStart(InputAction.CallbackContext context)
     {
-        if (context.phase == InputActionPhase.Performed)
+        //まだゲームがスタートしていない
+        if (context.phase == InputActionPhase.Performed && !_isStart) //押された
         {
-            _canGame = true;
+            _canGame = true; //プレイ可能に
+            _isStart = true; //ゲーム開始
         }
     }
 
@@ -240,6 +231,15 @@ public class PlayerInput : MonoBehaviour
         //初期化
         _autoRepeatTimer = 0;
         _autoRepeatDire = 0;
+    }
+
+    /// <summary>
+    /// <para>SetStopInput</para>
+    /// <para>プレイヤー入力を受け付けないようにします</para>
+    /// </summary>
+    public void SetStopInput()
+    {
+        _canGame = false; //プレイ不可能に
     }
     #endregion
 }

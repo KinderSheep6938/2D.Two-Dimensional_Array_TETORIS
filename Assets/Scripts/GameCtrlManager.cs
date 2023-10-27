@@ -27,11 +27,7 @@ public class GameCtrlManager : MonoBehaviour
     private AudioSource _bgmAudio = default; //BGMのAudioSource
     private MinoFactory _factorySystem = default; //ミノ生成システム
     private FieldManager _fieldSystem = default; //フィールド管理マネージャー
-
-    #endregion
-
-    #region プロパティ
-
+    private PlayerInput _playerInput = default; //プレイヤー操作マネージャー
     #endregion
 
     #region メソッド
@@ -44,14 +40,7 @@ public class GameCtrlManager : MonoBehaviour
         _bgmAudio = GetComponent<AudioSource>();
         _factorySystem = GetComponent<MinoFactory>();
         _fieldSystem = GetComponent<FieldManager>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
+        _playerInput = GetComponentInChildren<PlayerInput>();
     }
 
     /// <summary>
@@ -71,6 +60,7 @@ public class GameCtrlManager : MonoBehaviour
                 _gameoverViewObj.SetActive(true); //ゲームオーバー表示
                 _canRetry = true; //リトライ可能に
                 _bgmAudio.Stop(); //BGM停止
+                _playerInput.SetStopInput(); //プレイヤー入力不能に
             }
             return; //操作終了
         }

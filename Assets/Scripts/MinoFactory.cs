@@ -52,28 +52,12 @@ public class MinoFactory : MonoBehaviour
     }
 
     /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
-    }
-
-    /// <summary>
-    /// 更新処理
-    /// </summary>
-    void Update()
-    {
-
-    }
-
-    /// <summary>
     /// <para>CreateMino</para>
     /// <para>ミノを生成します</para>
     /// </summary>
     public void CreateMino()
     {
-        if (_onDebug) { DebugView(); }
+        if (_onDebug) { DebugView(); } //デバッグ表示
         //生成可能なミノ形が存在しない
         if(_canCreateModels.Count == 0)
         {

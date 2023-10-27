@@ -1,5 +1,5 @@
 // -------------------------------------------------------------------------------
-// UIManager.cs
+// ScoreUIManager.cs
 //
 // 作成日: 2023/10/25
 // 作成者: Shizuku
@@ -9,7 +9,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
-public class UIManager : MonoBehaviour
+public class ScoreUIManager : MonoBehaviour
 {
     #region 変数
     [SerializeField,Header("スコア表示テキスト")]
@@ -18,10 +18,6 @@ public class UIManager : MonoBehaviour
     private Text _levelText = default;
 
     private ScoreManager _scoreManager = default; //スコア管理クラス
-    #endregion
-
-    #region プロパティ
-
     #endregion
 
     #region メソッド

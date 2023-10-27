@@ -11,16 +11,14 @@ using UnityEngine;
 public class MinoPoolManager : MonoBehaviour
 {
     #region 変数
-    private const int MAX_MINO_CNT = 4;
+    private const int MAX_USEMINO_CNT = 4; //最大使用ミノブロック数
     
-
     [SerializeField,Header("ミノブロック")]
     private GameObject _minoBlock = default;
-    private IMinoBlockAccessible[] _useableMinos = new IMinoBlockAccessible[MAX_MINO_CNT];
-    #endregion
-
-    #region プロパティ
-
+    [SerializeField, Header("事前生成ミノ数")]
+    private int _poolValue = 150;
+    private List<IMinoBlockAccessible> _minoPool = new List<IMinoBlockAccessible>(); //プール
+    private IMinoBlockAccessible[] _useableMinos = new IMinoBlockAccessible[MAX_USEMINO_CNT]; //使用可能ミノブロック
     #endregion
 
     #region メソッド
@@ -29,23 +27,20 @@ public class MinoPoolManager : MonoBehaviour
     /// </summary>
     void Awake()
     {
+        //初期化
+        //非表示で生成する
+        _minoBlock.GetComponent<IMinoBlockAccessible>().SetMinoView(false);
+        //プール初期化
+        _minoPool.Clear();
+        //指定数までプールを貯める
+        while(_minoPool.Count < _poolValue)
+        {
+            //生成しプール設定
+            _minoPool.Add(Instantiate(_minoBlock).GetComponent<IMinoBlockAccessible>());
+        }
 
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
-    }
-
-    /// <summary>
-    /// 更新処理
-    /// </summary>
-    void Update()
-    {
-
+        //表示状態に設定する
+        _minoBlock.GetComponent<IMinoBlockAccessible>().SetMinoView(true);
     }
 
     /// <summary>
@@ -58,9 +53,22 @@ public class MinoPoolManager : MonoBehaviour
         //現在はInstantiate
 
         //使用可能なミノブロックを取得
-        for(int i = 0; i < MAX_MINO_CNT; i++)
+        for(int i = 0; i < MAX_USEMINO_CNT; i++)
         {
-            _useableMinos[i] = Instantiate(_minoBlock).GetComponent<IMinoBlockAccessible>();
+            //プールに使用可能ミノがあるか
+            if(0 < _minoPool.Count)
+            {
+                //表示する
+                _minoPool[0].SetMinoView(true);
+                //プールから取得
+                _useableMinos[i] = _minoPool[0];
+                _minoPool.RemoveAt(0);
+            }
+            else
+            {   //ない場合は新しく生成する
+                _useableMinos[i] = Instantiate(_minoBlock).GetComponent<IMinoBlockAccessible>();
+            }
+
         }
         //使用可能なミノブロックを送信
         return _useableMinos;
@@ -71,12 +79,13 @@ public class MinoPoolManager : MonoBehaviour
     /// <para>ObjectPoolに使用終了したミノブロックを返却します</para>
     /// </summary>
     /// <param name="unUseableMino">使用終了したミノブロック</param>
-    public void EndUseableMino(GameObject unUseableMino)
+    public void EndUseableMino(IMinoBlockAccessible unUseableMino)
     {
-        //現在はDestroy
+        //非表示に設定
+        unUseableMino.SetMinoView(false);
+        //プールに登録
+        _minoPool.Add(unUseableMino);
 
-        //オブジェクト破棄
-        Destroy(unUseableMino);
         return;
     }
     #endregion

@@ -10,7 +10,7 @@
                     "type": "Value",
                     "id": "2bd5be1d-0b15-4e53-ad29-cbd3d2324906",
                     "expectedControlType": "Axis",
-                    "processors": "AxisDeadzone(min=0.95,max=1)",
+                    "processors": "AxisDeadzone(min=0.98,max=1)",
                     "interactions": "Press",
                     "initialStateCheck": true
                 },
@@ -28,7 +28,7 @@
                     "type": "Value",
                     "id": "432251e7-9b25-4170-9f8c-7a62f592b2e4",
                     "expectedControlType": "Axis",
-                    "processors": "AxisDeadzone(min=0.95,max=1)",
+                    "processors": "AxisDeadzone(min=0.98,max=1)",
                     "interactions": "Press",
                     "initialStateCheck": true
                 },
@@ -63,6 +63,15 @@
                     "name": "ButtonHold",
                     "type": "Button",
                     "id": "86971a13-8147-4839-bb18-ab4511d546dd",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "ButtonReStart",
+                    "type": "Button",
+                    "id": "d67a9e27-c396-450d-a270-325fee320933",
                     "expectedControlType": "Button",
                     "processors": "",
                     "interactions": "",
@@ -298,6 +307,28 @@
                     "processors": "",
                     "groups": "Keyboard&Mouse",
                     "action": "ButtonHold",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "90ca34a3-8e5d-4e5e-a98a-ac51f1bfb218",
+                    "path": "<Keyboard>/enter",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "ButtonReStart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "8eb9c049-8d93-46e7-b3e6-0a277f1ca956",
+                    "path": "<Gamepad>/start",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Gamepad",
+                    "action": "ButtonReStart",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }

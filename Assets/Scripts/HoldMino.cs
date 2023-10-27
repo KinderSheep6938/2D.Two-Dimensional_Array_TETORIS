@@ -22,10 +22,6 @@ public class HoldMino : MinoModelGeneration, IMinoHoldable
     private MinoFactory _minoFactory = default;
     #endregion
 
-    #region プロパティ
-
-    #endregion
-
     #region メソッド
     /// <summary>
     /// 初期化処理
@@ -34,22 +30,6 @@ public class HoldMino : MinoModelGeneration, IMinoHoldable
     {
         _playerMino = GameObject.FindGameObjectWithTag(PLAYABLE_MINOCTRL_TAG).GetComponent<IMinoCreatable>();
         _minoFactory = FindObjectOfType<MinoFactory>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
-    }
-
-    /// <summary>
-    /// 更新処理
-    /// </summary>
-    void Update()
-    {
-
     }
 
     // クラス継承

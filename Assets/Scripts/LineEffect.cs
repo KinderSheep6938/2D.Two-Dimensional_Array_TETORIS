@@ -17,10 +17,6 @@ public class LineEffect : MonoBehaviour
     private ParticleSystem _particleSystem = default; //自身のParticleSystem
     #endregion
 
-    #region プロパティ
-
-    #endregion
-
     #region メソッド
     /// <summary>
     /// 初期化処理
@@ -29,22 +25,6 @@ public class LineEffect : MonoBehaviour
     {
         _transform = transform;
         _particleSystem = _transform.GetComponent<ParticleSystem>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
-    }
-
-    /// <summary>
-    /// 更新処理
-    /// </summary>
-    void Update()
-    {
-
     }
 
     /// <summary>

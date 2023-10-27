@@ -33,11 +33,10 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     private const int MINITSPIN_JUDGE_SRSCNT = 4; //ミニTスピン
 
     //プレイヤー操作制御用
-    private const float ROTATE_VALUE = 90f; //回転処理の回転角度
-    private const float SOFTDROP_SPEED = 4.5f; //ソフトドロップの倍速速度
+    private const int ROTATE_VALUE = 90; //回転処理の回転角度
 
     //回転系統 スパロテなど
-    private int _nowAngle = 0; //現在のミノの向き
+    private int _nowAngleID = 0; //現在のミノの向き
     private int _moveDire = 0; //回転方向
     private bool _needReturn = false; //回転巻き戻し判定
     private int _srsCnt = 0; //スパロテの回数
@@ -52,9 +51,14 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     private int _lockDownCancel = 0; //設置回避数
     private const int MAX_CANCEL_CNT = 15; //最大回避数
 
-    //ホールド判定
-    private bool _isHold = false;
+    //ソフトドロップ機構
+    private const float SOFTDROP_FALLTIME = 0.05f; //ソフトドロップの周期
+    private float _softDropTimer = 0f; //ソフトドロップタイマー
 
+    //ホールド判定
+    private bool _isHold = false; //ホールド使用判定
+
+    //サウンド関連
     [SerializeField, Header("回転SE")]
     private AudioClip _rotateSE = default;
     [SerializeField, Header("TスピンSE")]
@@ -62,6 +66,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     [SerializeField, Header("ハードドロップSE")]
     private AudioClip _hardDropSE = default;
     private AudioSource _myAudio = default; //自身のAudioSource
+
     private IGhostStartable _ghost = default; //ゴーストシステム
     #endregion
 
@@ -77,14 +82,6 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     {
         _ghost = FindObjectOfType<GhostMino>(); //ゴースト取得
         _myAudio = GetComponent<AudioSource>();
-    }
-
-    /// <summary>
-    /// 更新前処理
-    /// </summary>
-    void Start()
-    {
-
     }
 
     /// <summary>
@@ -126,15 +123,14 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     }
 
     // インターフェイス継承
-    public void Rotate(int angle)
+    public void Rotate(int dire)
     {
-
         //回転反映
-        MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * angle;
+        MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * dire;
         
         //正規化取得
-        _nowAngle = GetAngleID(MyTransform.eulerAngles.z); //向き取得
-        _moveDire = angle; //回転方向取得
+        _nowAngleID = GetAngleID(Mathf.FloorToInt(MyTransform.eulerAngles.z)); //向き取得
+        _moveDire = dire; //回転方向取得
         _needReturn = false; //回転可能
 
         //スパロテ回数初期化
@@ -142,17 +138,17 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //衝突判定があった場合はスーパーローテーションシステムを実行する
         if (CheckMinoCollision())
         {
-            Debug.Log("srs");
             if (MyModel == IMinoCreatable.MinoType.minoI) { SRSByFour(); } //サイズが４ｘ４
             SRSByThree(); //サイズが３ｘ３
+
         }
 
         //スパロテができない場合は角度を戻す
         if (_needReturn)
         {
             //角度を戻す
-            MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * -angle; 
-            _nowAngle = GetAngleID(MyTransform.eulerAngles.z); //向き取得
+            MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * -dire; 
+            _nowAngleID = GetAngleID(Mathf.FloorToInt(MyTransform.eulerAngles.z)); //向き取得
             _moveDire = 0; //回転方向消去
             return;
         }
@@ -177,15 +173,17 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     /// </summary>
     /// <param name="angle">操作ミノの角度</param>
     /// <returns>角度ID</returns>
-    public int GetAngleID(float angle)
+    public int GetAngleID(int angle)
     {
         //角度は全てマイナス方向に調整した状態にする
+        //0の場合は0を返す
+        if(angle == 0) { return 0; }
         //角度がプラスである
-        if(0 < angle)
+        if (0 < angle)
         {
-            return (int)((angle - 360f) / ROTATE_VALUE) * -1;
+            return (angle - 360) / ROTATE_VALUE * -1;
         }
-        return (int)(angle / ROTATE_VALUE) * -1;
+        return angle / ROTATE_VALUE * -1;
     }
     
     //インターフェイス継承
@@ -196,7 +194,6 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         {
             //回転方向消去
             _moveDire = 0;
-
             //１列落下
             MyTransform.position += Vector3.down;
             //再起呼び出し
@@ -218,8 +215,18 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     //インターフェイス継承
     public void SoftDrop()
     {
-        //タイマー倍増
-        _fallTimer += Time.deltaTime * SOFTDROP_SPEED;
+        //下が空白ではない
+        if (!CheckMinoCollision(0, -1))
+        {
+            _softDropTimer += Time.deltaTime; //タイマー加算
+            //周期時間以上経った
+            if(SOFTDROP_FALLTIME <= _softDropTimer)
+            {
+                MyTransform.position += Vector3.down; //1マス落下
+                _softDropTimer = 0; //タイマー初期化
+            }
+            _fallTimer = 0; //自由落下を停止（０でストップ）
+        }
     }
 
     //インターフェイス継承
@@ -331,7 +338,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
 
         //条件１：軸を中心とした３ｘ３の４つの隅に衝突判定がある
         //判定のあった隅がTスピン判定値より小さい場合は、Tスピンではない
-        if (EdgeCollisionByTSpin()) { return false; }
+        if (!EdgeCollisionByTSpin()) { return false; }
 
         //条件２：最後の動作が回転である
         //回転でない場合は、Tスピンではない
@@ -340,8 +347,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //ここからはミニTスピン判定を行う
         //これらの条件に合致した場合は、ミニTスピンのためfalseと返す
         //条件１：凸の両端のどちらかに衝突判定がない
-        Debug.Log((CheckCollisionByCenter(TSpinCos(_nowAngle), TSpinSin(_nowAngle)) && CheckCollisionByCenter(TSpinSin(_nowAngle), TSpinCos(_nowAngle))));
-        if(!(CheckCollisionByCenter(TSpinCos(_nowAngle), TSpinSin(_nowAngle)) && CheckCollisionByCenter(TSpinSin(_nowAngle), TSpinCos(_nowAngle))))
+        if(!(CheckCollisionByCenter(TSpinCos(_nowAngleID), TSpinSin(_nowAngleID)) && CheckCollisionByCenter(TSpinSin(_nowAngleID), -TSpinCos(_nowAngleID))))
         {
             //条件２：スパロテの回転補正の第四条件でないこと
             if (_srsCnt != MINITSPIN_JUDGE_SRSCNT) { return false; } //ミニTスピンである
@@ -369,6 +375,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //3つ以上ある場合はTrue
         if (TSPIN_JUDGE_CNT <= collisionCnt) { return true; }
 
+
         return false; //3つに満たさない
     }
 
@@ -378,11 +385,11 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     /// <para>与えられた値が180度以上であれば-1</para>
     /// <para>以下であれば1を返します</para>
     /// </summary>
-    /// <param name="angle">角度</param>
+    /// <param name="angleID">角度</param>
     /// <returns></returns>
-    private int TSpinSin(float angle)
+    private int TSpinSin(float angleID)
     {
-        if(MINITSPIN_JUDGE_VALUE180 <= angle)
+        if(MINITSPIN_JUDGE_VALUE180 <= angleID * ROTATE_VALUE)
         {
             return -1;
         }
@@ -392,14 +399,14 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     /// <summary>
     /// <para>TSpinCos</para>
     /// <para>ミニTスピンのアルゴリズム部品</para>
-    /// <para>与えられた値が270度で割り切れるまたは0度の時は-1</para>
+    /// <para>与えられた値が270度または0度の時は-1</para>
     /// <para>それ以外であれば1を返します</para>
     /// </summary>
-    /// <param name="angle">角度</param>
+    /// <param name="angleID">角度</param>
     /// <returns></returns>
-    private int TSpinCos(float angle)
+    private int TSpinCos(float angleID)
     {
-        if (angle % MINITSPIN_JUDGE_VALUE270 == 0)
+        if (angleID * ROTATE_VALUE % MINITSPIN_JUDGE_VALUE270 == 0)
         {
             return -1;
         }
@@ -417,7 +424,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         {
             case 0: //第１条件 --------------------------------------------------------------------------------------------------------------------------
                 _srsPos.startPos = MyTransform.position; //初期座標保存
-                if (_nowAngle == ANGLE_RIGHT_ID || (_nowAngle == ANGLE_DOWN_ID && _moveDire == DIRE_LEFT_ID) || (_nowAngle == ANGLE_UP_ID && _moveDire == DIRE_RIGHT_ID))
+                if (_nowAngleID == ANGLE_RIGHT_ID || (_nowAngleID == ANGLE_DOWN_ID && _moveDire == DIRE_LEFT_ID) || (_nowAngleID == ANGLE_UP_ID && _moveDire == DIRE_RIGHT_ID))
                 {
                     MyTransform.position += Vector3.left;
                     break; //現条件終了
@@ -427,7 +434,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
 
             case 1: //第２条件 --------------------------------------------------------------------------------------------------------------------------
                 //座標継続
-                if (_nowAngle == ANGLE_RIGHT_ID || _nowAngle == ANGLE_LEFT_ID)
+                if (_nowAngleID == ANGLE_RIGHT_ID || _nowAngleID == ANGLE_LEFT_ID)
                 {
                     MyTransform.position += Vector3.up;
                     break; //現条件終了
@@ -437,7 +444,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
 
             case 2: //第３条件 --------------------------------------------------------------------------------------------------------------------------
                 MyTransform.position = _srsPos.startPos; //初期座標引き戻し
-                if (_nowAngle == ANGLE_RIGHT_ID || _nowAngle == ANGLE_LEFT_ID)
+                if (_nowAngleID == ANGLE_RIGHT_ID || _nowAngleID == ANGLE_LEFT_ID)
                 {
                     MyTransform.position += Vector3.down * 2;
                     break; //現条件終了
@@ -447,7 +454,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
 
             case 3: //第４条件 --------------------------------------------------------------------------------------------------------------------------
                 //座標継続
-                if (_nowAngle == ANGLE_RIGHT_ID || (_nowAngle == ANGLE_DOWN_ID && _moveDire == DIRE_LEFT_ID) || (_nowAngle == ANGLE_UP_ID && _moveDire == DIRE_RIGHT_ID))
+                if (_nowAngleID == ANGLE_RIGHT_ID || (_nowAngleID == ANGLE_DOWN_ID && _moveDire == DIRE_LEFT_ID) || (_nowAngleID == ANGLE_UP_ID && _moveDire == DIRE_RIGHT_ID))
                 {
                     MyTransform.position += Vector3.left;
                     break; //現条件終了
@@ -475,19 +482,19 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         {
             case 0: //第１条件 --------------------------------------------------------------------------------------------------------------------------
                 _srsPos.startPos = MyTransform.position; //初期座標保存
-                if(_nowAngle == ANGLE_UP_ID)
+                if(_nowAngleID == ANGLE_UP_ID)
                 {
                     MyTransform.position += Vector3.left * 2 * _moveDire;
                     break; //現条件終了
                 }
-                if(_nowAngle == ANGLE_DOWN_ID)
+                if(_nowAngleID == ANGLE_DOWN_ID)
                 {
                     MyTransform.position += Vector3.left * _moveDire;
                     break; //現条件終了
                 }
                 if(_moveDire == DIRE_RIGHT_ID)
                 {
-                    if(_nowAngle == ANGLE_RIGHT_ID)
+                    if(_nowAngleID == ANGLE_RIGHT_ID)
                     {
                         MyTransform.position += Vector3.left * 2;
                     }
@@ -498,7 +505,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
                 }
                 else
                 {
-                    if (_nowAngle == ANGLE_RIGHT_ID)
+                    if (_nowAngleID == ANGLE_RIGHT_ID)
                     {
                         MyTransform.position += Vector3.right;
                     }
@@ -512,19 +519,19 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
             case 1: //第２条件 --------------------------------------------------------------------------------------------------------------------------
                 _srsPos.firstSRSPos = MyTransform.position; //第１条件位置保存
                 MyTransform.position = _srsPos.startPos; //初期座標引き戻し
-                if (_nowAngle == ANGLE_UP_ID)
+                if (_nowAngleID == ANGLE_UP_ID)
                 {
                     MyTransform.position += Vector3.right * _moveDire;
                     break; //現条件終了
                 }
-                if (_nowAngle == ANGLE_DOWN_ID)
+                if (_nowAngleID == ANGLE_DOWN_ID)
                 {
                     MyTransform.position += Vector3.right * 2 * _moveDire;
                     break; //現条件終了
                 }
                 if (_moveDire == DIRE_LEFT_ID)
                 {
-                    if (_nowAngle == ANGLE_RIGHT_ID)
+                    if (_nowAngleID == ANGLE_RIGHT_ID)
                     {
                         MyTransform.position += Vector3.left * 2;
                     }
@@ -535,7 +542,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
                 }
                 else
                 {
-                    if (_nowAngle == ANGLE_RIGHT_ID)
+                    if (_nowAngleID == ANGLE_RIGHT_ID)
                     {
                         MyTransform.position += Vector3.right;
                     }
@@ -549,7 +556,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
             case 2: //第３条件 --------------------------------------------------------------------------------------------------------------------------
                 _srsPos.secondSRSPos = MyTransform.position; //第２条件位置保存
                 MyTransform.position = _srsPos.firstSRSPos; //第１座標引き戻し
-                if(_nowAngle == ANGLE_RIGHT_ID)
+                if(_nowAngleID == ANGLE_RIGHT_ID)
                 {
                     if(_moveDire == DIRE_RIGHT_ID)
                     {
@@ -561,7 +568,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
                     }
                     break; //現条件終了
                 }
-                if(_nowAngle == ANGLE_LEFT_ID)
+                if(_nowAngleID == ANGLE_LEFT_ID)
                 {
                     if(_moveDire == DIRE_RIGHT_ID)
                     {
@@ -573,7 +580,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
                     }
                     break; //現条件終了
                 }
-                if(_nowAngle == ANGLE_UP_ID)
+                if(_nowAngleID == ANGLE_UP_ID)
                 {
                     if(_moveDire == DIRE_LEFT_ID)
                     {
@@ -597,7 +604,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
 
             case 3: //第４条件 --------------------------------------------------------------------------------------------------------------------------
                 MyTransform.position = _srsPos.secondSRSPos; //第１条件座標引き戻し
-                if (_nowAngle == ANGLE_RIGHT_ID)
+                if (_nowAngleID == ANGLE_RIGHT_ID)
                 {
                     if (_moveDire == DIRE_LEFT_ID)
                     {
@@ -609,7 +616,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
                     }
                     break; //現条件終了
                 }
-                if (_nowAngle == ANGLE_LEFT_ID)
+                if (_nowAngleID == ANGLE_LEFT_ID)
                 {
                     if (_moveDire == DIRE_LEFT_ID)
                     {
@@ -621,7 +628,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
                     }
                     break; //現条件終了
                 }
-                if (_nowAngle == ANGLE_UP_ID)
+                if (_nowAngleID == ANGLE_UP_ID)
                 {
                     if (_moveDire == DIRE_RIGHT_ID)
                     {
@@ -675,7 +682,6 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //生成位置にミノが既にあるか
         if (CheckMinoCollision())
         {
-            Debug.Log("MinoCantPlay");
             //プレイ不可能
             NotPlay();
         }
