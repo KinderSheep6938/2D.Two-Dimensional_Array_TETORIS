@@ -48,35 +48,22 @@ public class MinoPoolManager : MonoBehaviour
     /// <para>ObjectPoolから使用可能なミノブロックを取得します</para>
     /// </summary>
     /// <returns>使用可能なミノブロック</returns>
-    public IMinoBlockAccessible[] GetUseableMino()
+    public IMinoBlockAccessible[] GetUseableMinos()
     {
-        //現在はInstantiate
-
-        //使用可能なミノブロックを取得
+        //最大使用数分ミノを取得する
         for(int i = 0; i < MAX_USEMINO_CNT; i++)
         {
-            //プールに使用可能ミノがあるか
-            if(0 < _minoPool.Count)
-            {
-                //表示する
-                _minoPool[0].SetMinoView(true);
-                //プールから取得
-                _useableMinos[i] = _minoPool[0];
-                _minoPool.RemoveAt(0);
-            }
-            else
-            {   //ない場合は新しく生成する
-                _useableMinos[i] = Instantiate(_minoBlock).GetComponent<IMinoBlockAccessible>();
-            }
-
+            //使用可能なミノブロックを取得
+            _useableMinos[i] = GetMinoByPool();
         }
+
         //使用可能なミノブロックを送信
         return _useableMinos;
     }
 
     /// <summary>
     /// <para>EndUseableMino</para>
-    /// <para>ObjectPoolに使用終了したミノブロックを返却します</para>
+    /// <para>Poolに使用終了したミノブロックを返却します</para>
     /// </summary>
     /// <param name="unUseableMino">使用終了したミノブロック</param>
     public void EndUseableMino(IMinoBlockAccessible unUseableMino)
@@ -87,6 +74,33 @@ public class MinoPoolManager : MonoBehaviour
         _minoPool.Add(unUseableMino);
 
         return;
+    }
+
+    /// <summary>
+    /// <para>GetMinoByPool</para>
+    /// <para>Poolから使用可能なミノブロックを取得します</para>
+    /// </summary>
+    /// <returns>使用可能なミノブロック</returns>
+    public IMinoBlockAccessible GetMinoByPool()
+    {
+        IMinoBlockAccessible returnMino;
+        //使用可能なミノブロックを取得
+        //プールに使用可能ミノがあるか
+        Debug.Log(0 < _minoPool.Count);
+        if (0 < _minoPool.Count)
+        {
+            //プールから取得
+            returnMino = _minoPool[0];
+            _minoPool.RemoveAt(0);
+            returnMino.SetMinoView(true);
+        }
+        else
+        {
+            //ない場合は新しく生成する
+            returnMino = Instantiate(_minoBlock).GetComponent<IMinoBlockAccessible>();
+        }
+        Debug.Log(_minoPool.Count);
+        return returnMino;
     }
     #endregion
 }

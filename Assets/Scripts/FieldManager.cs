@@ -28,7 +28,7 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private const int TSPIN_SCORE_RATIO = 2; //Tスピン判定のスコア倍増率
 
     private int[,] _field = new int[FIELD_MAX_HEIGHT,FIELD_MAX_WIDTH]; //フィールド保存 [縦軸:y,横軸:x]
-    private List<int> _deleteLineIndexs = new(); //完成ラインのIndex保存用
+    private List<int> _deleteLineIndexs = new List<int>(); //完成ラインのIndex保存用
     private bool _isLine = false; //完成ライン判定
     private int _fallValue = 0; //ライン削除の落下距離
     private int _commitCnt = 0; //設置した操作ミノブロックの数
@@ -41,13 +41,13 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     private Transform _fieldParent = default; //フィールド管理オブジェ
 
     [SerializeField, Header("ライン消去エフェクト")]
-    private LineEffect[] _deleteLineEfe = default;
+    private LineEffect[] _deleteLineEfe = default; //ライン消去のエフェクトオブジェ
     [SerializeField, Header("テトリステキスト")]
-    private TextEffect _tetrisText = default;
+    private TextEffect _tetrisText = default; //テトリス表示のテキスト
     [SerializeField, Header("Tスピンテキスト")]
-    private TextEffect _tSpinText = default;
+    private TextEffect _tSpinText = default; //Tスピン表示のテキスト
     [SerializeField, Header("ライン消去SE 0:通常 1:テトリス")]
-    private AudioClip[] _deleteLineSE = default;
+    private AudioClip[] _deleteLineSE = default; //ライン消去時の効果音
     private AudioSource _myAudio = default; //自身のAudioSource
 
     private ScoreManager _scoreManager = default; //スコア管理マネージャー
@@ -137,16 +137,18 @@ public class FieldManager : MonoBehaviour, IFieldAccess
 
             //列ごとにエフェクト
             for(int i = 0; i < _deleteLineIndexs.Count; i++) { _deleteLineEfe[i].SetEffect(_deleteLineIndexs[i]); }
+
             //4列の場合はテトリスエフェクト (引数としては一番上の列を渡す)
             if (_deleteLineIndexs.Count == TETRIS_LINE) { _tetrisText.SetView(); }
+
             //Tスピン判定の場合は Tスピンエフェクト と スコア倍増
             if (_tSpin)
             {
                 _tSpinText.SetView(); //エフェクト
                 _scoreManager.AddScore(_deleteLineIndexs.Count * TSPIN_SCORE_RATIO); //スコア倍増
                 return;
-                
             }
+
             //スコア加算
             _scoreManager.AddScore(_deleteLineIndexs.Count);
         }
@@ -258,6 +260,58 @@ public class FieldManager : MonoBehaviour, IFieldAccess
     {
         _canPlay = false;
         return;
+    }
+    #endregion
+
+    #region デバッグ用メソッド
+    /// <summary>
+    /// <para>RemoveField</para>
+    /// <para>フィールドを初期化します</para>
+    /// </summary>
+    public void RemoveField()
+    {
+        //4ラインずつ消去する
+        int allLine = FIELD_MAX_HEIGHT / TETRIS_LINE;
+        //消去ライン設定
+        _deleteLineIndexs.Clear();
+        _deleteLineIndexs.Add(0);
+        _deleteLineIndexs.Add(1);
+        _deleteLineIndexs.Add(2);
+        _deleteLineIndexs.Add(3);
+        //ミノ削除
+        foreach (ILineMinoCtrl lineMino in FindObjectsOfType<Mino>())
+        {
+            for(int i = 0;i <= allLine; i++)
+            {
+                lineMino.LineCtrl(_deleteLineIndexs);
+            }
+        }
+        //フィールド初期化
+        for(int y = 0; y < FIELD_MAX_HEIGHT; y++)
+        {
+            for(int x = 0; x < FIELD_MAX_WIDTH; x++)
+            {
+                _field[y, x] = TILE_NONE_ID;
+            }
+        }
+    }
+
+    /// <summary>
+    /// <para>LevelUp</para>
+    /// <para>レベルを１上げます</para>
+    /// </summary>
+    public void LevelUp()
+    {
+        _scoreManager.AddScore(_scoreManager.LevelBorder);
+    }
+
+    /// <summary>
+    /// <para>DeleteCommit</para>
+    /// <para>コミット処理を無効にします</para>
+    /// </summary>
+    public void DeleteCommit()
+    {
+        _commitCnt = 0;
     }
     #endregion
 }

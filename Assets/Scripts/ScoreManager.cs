@@ -32,6 +32,8 @@ public class ScoreManager : MonoBehaviour
     #region プロパティ
     public int Level { get => 1 + (_clearLine / LEVELUP_BORDERLINE); }
     public int Score { get => _score; }
+
+    public int LevelBorder { get => LEVELUP_BORDERLINE; }
     #endregion
 
     #region メソッド

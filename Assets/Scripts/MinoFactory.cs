@@ -68,7 +68,7 @@ public class MinoFactory : MonoBehaviour
         //生成可能なミノ形のIndexを設定
         _createModelIndex = Random.Range(0, _canCreateModels.Count);
         //ミノ生成　引数：使用可能なミノブロック,生成するミノ形
-        _minoCreator.CreateMinoUnit(_minoManager.GetUseableMino(), _canCreateModels[_createModelIndex]);
+        _minoCreator.CreateMinoUnit(_minoManager.GetUseableMinos(), _canCreateModels[_createModelIndex]);
         //生成したミノ形をリストから除外
         _canCreateModels.RemoveAt(_createModelIndex);
     }

@@ -61,6 +61,8 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
         _transform.position = parent.position + Vector3.right * x + Vector3.up * y;
         //軸を親に設定
         _transform.parent = parent;
+        //表示
+        _myRen.enabled = true;
     }
 
     //インターフェイス継承
@@ -95,7 +97,11 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
         if (_transform.parent != null || !_myRen.enabled ) { return; }
 
         //削除対象のラインにある場合、削除する
-        if (deleteLineHeights.Contains(MinoY)) { DeleteMino(); }
+        if (deleteLineHeights.Contains(MinoY)) 
+        {
+            DeleteMino();
+            return;
+        }
 
         //削除対象のラインに応じて、落下処理を行います
         for (_deleteLineCnt = 0; _deleteLineCnt < deleteLineHeights.Count; _deleteLineCnt++)
@@ -143,6 +149,7 @@ public class Mino : MonoBehaviour, IMinoBlockAccessible, ILineMinoCtrl
     /// </summary>
     private void DeleteMino()
     {
+        _myRen.enabled = false;
         minoManager.EndUseableMino(_myBlock);
         return;
     }

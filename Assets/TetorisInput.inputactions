@@ -76,6 +76,33 @@
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
+                },
+                {
+                    "name": "DebugIField",
+                    "type": "Button",
+                    "id": "add8c37a-f442-456f-a977-f4a3ea26141a",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugTField",
+                    "type": "Button",
+                    "id": "9776a8a7-69b7-4955-b5c1-341c7e325430",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
+                },
+                {
+                    "name": "DebugLevelUp",
+                    "type": "Button",
+                    "id": "3a3e6729-a909-4162-a02f-51a1494d3a06",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "",
+                    "initialStateCheck": false
                 }
             ],
             "bindings": [
@@ -329,6 +356,39 @@
                     "processors": "",
                     "groups": "Gamepad",
                     "action": "ButtonReStart",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "ef7c8ec8-73dd-4aeb-888d-5cd1044a970d",
+                    "path": "<Keyboard>/i",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "DebugIField",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "922dc21b-41e8-48b2-8241-713821e2cf29",
+                    "path": "<Keyboard>/t",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "DebugTField",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "01ed6afa-e86c-4dff-9920-62c1ad6c7514",
+                    "path": "<Keyboard>/l",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "Keyboard&Mouse",
+                    "action": "DebugLevelUp",
                     "isComposite": false,
                     "isPartOfComposite": false
                 }
