@@ -36,6 +36,15 @@ public class ScoreManager : MonoBehaviour
 
     #region メソッド
     /// <summary>
+    /// 初期化処理
+    /// </summary>
+    void Awake()
+    {
+        //初期速度設定
+        _playableMino.FallTime = LevelOfFallTime();
+    }
+
+    /// <summary>
     /// <para>AddScore</para>
     /// <para>消したラインに応じて、スコアを加算します</para>
     /// </summary>
