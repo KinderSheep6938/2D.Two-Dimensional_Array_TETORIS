@@ -47,9 +47,9 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
 
     //ロックダウン機構
     private const float LOCKDOWN_WAIT_TIMER = 0.5f; //設置待機時間
+    private const int MAX_CANCEL_CNT = 15; //最大回避数
     private float _waitTimer = 0; //待機タイマー
     private int _lockDownCancel = 0; //設置回避数
-    private const int MAX_CANCEL_CNT = 15; //最大回避数
 
     //ソフトドロップ機構
     private const float SOFTDROP_FALLTIME = 0.05f; //ソフトドロップの周期
@@ -182,9 +182,9 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
         //角度がプラスである
         if (0 < angle)
         {
-            return (angle - 360) / ROTATE_VALUE * -1;
+            return -((angle - 360) / ROTATE_VALUE);
         }
-        return angle / ROTATE_VALUE * -1;
+        return -(angle / ROTATE_VALUE);
     }
     
     //インターフェイス継承

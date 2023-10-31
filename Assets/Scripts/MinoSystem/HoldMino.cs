@@ -40,7 +40,7 @@ public class HoldMino : MinoModelGeneration, IMinoHoldable
     }
 
     //インターフェイス継承
-    public void Hold()
+    void IMinoHoldable.Hold()
     {
         Debug.Log("Hold");
         //保持しているモデルを退避
