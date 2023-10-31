@@ -109,7 +109,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     }
 
     // インターフェイス継承
-    public void Move(int x)
+    void IMinoUnionCtrl.Move(int x)
     {
         //移動先に衝突判定があるか
         if (!CheckMinoCollision(x, 0))
@@ -124,7 +124,7 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     }
 
     // インターフェイス継承
-    public void Rotate(int dire)
+    void IMinoUnionCtrl.Rotate(int dire)
     {
         //回転反映
         MyTransform.eulerAngles -= Vector3.forward * ROTATE_VALUE * dire;
@@ -188,33 +188,27 @@ public class PlayableMino : AccessibleToField, IMinoUnionCtrl
     }
     
     //インターフェイス継承
-    public void HardDrop()
+    void IMinoUnionCtrl.HardDrop()
     {
-        //落下先に衝突判定がない
-        if (!CheckMinoCollision(0, -1))
+        //1マス下に衝突判定がない
+        while (!CheckMinoCollision(0, -1))
         {
             //回転方向消去
             _moveDire = 0;
             //１列落下
             MyTransform.position += Vector3.down;
-            //再起呼び出し
-            HardDrop();
         }
-        else //ある
-        {
-            //効果音再生
-            _myAudio.PlayOneShot(_hardDropSE);
-            //コミット
-            Commit();
 
-            return; //処理終了
-        }
+        //効果音再生
+        _myAudio.PlayOneShot(_hardDropSE);
+        //コミット
+        Commit();
 
         return;
     }
 
     //インターフェイス継承
-    public void SoftDrop()
+    void IMinoUnionCtrl.SoftDrop()
     {
         //下が空白ではない
         if (!CheckMinoCollision(0, -1))
