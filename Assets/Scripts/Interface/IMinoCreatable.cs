@@ -34,6 +34,7 @@ public interface IMinoCreatable
     /// <para>CreateMinoUnit</para>
     /// <para>指定されたミノ形にミノブロックを設定します</para>
     /// </summary>
+    /// <param name="minoBlocks">使用するミノ</param>
     /// <param name="setModel">変形するミノ形</param>
     void CreateMinoUnit(IMinoBlockAccessible[] minoBlocks,MinoType setModel);
 }
