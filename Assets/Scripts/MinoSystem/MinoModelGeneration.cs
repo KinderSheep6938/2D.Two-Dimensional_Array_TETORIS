@@ -22,7 +22,7 @@ public class MinoModelGeneration : MonoBehaviour,IMinoCreatable
     #region プロパティ
     public Transform MyTransform { get => _transform; }
     public IMinoCreatable.MinoType MyModel { get => _myModel; }
-    public IMinoBlockAccessible[] Minos { get => _minos; set => _minos = value; }
+    public IMinoBlockAccessible[] Minos { get => _minos; }
     #endregion
 
     #region メソッド
