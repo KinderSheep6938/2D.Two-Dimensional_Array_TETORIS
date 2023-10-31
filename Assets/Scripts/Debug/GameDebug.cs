@@ -37,16 +37,8 @@ public class GameDebug : MonoBehaviour
     {
         //‰Šú‰»
         _transform = transform;
-        _fieldManager = FindObjectOfType<FieldManager>();
-        _minoPool = FindObjectOfType<MinoPoolManager>();
-    }
-
-    /// <summary>
-    /// XVˆ—
-    /// </summary>
-    void Update()
-    {
-
+        _fieldManager = GetComponentInParent<FieldManager>();
+        _minoPool = GetComponentInParent<MinoPoolManager>();
     }
 
     /// <summary>
