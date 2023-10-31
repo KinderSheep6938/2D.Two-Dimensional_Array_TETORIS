@@ -11,16 +11,16 @@
                     "id": "2bd5be1d-0b15-4e53-ad29-cbd3d2324906",
                     "expectedControlType": "Axis",
                     "processors": "AxisDeadzone(min=0.98,max=1)",
-                    "interactions": "Press",
+                    "interactions": "",
                     "initialStateCheck": true
                 },
                 {
                     "name": "ButonRight",
-                    "type": "Value",
+                    "type": "Button",
                     "id": "1be48e5e-a8c8-4c20-8bd4-22026764af08",
-                    "expectedControlType": "Axis",
-                    "processors": "AxisDeadzone(min=0.5,max=1)",
-                    "interactions": "Hold(duration=0.3,pressPoint=0.2)",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold(duration=0.3,pressPoint=0.9)",
                     "initialStateCheck": true
                 },
                 {
@@ -29,16 +29,16 @@
                     "id": "432251e7-9b25-4170-9f8c-7a62f592b2e4",
                     "expectedControlType": "Axis",
                     "processors": "AxisDeadzone(min=0.98,max=1)",
-                    "interactions": "Press",
+                    "interactions": "",
                     "initialStateCheck": true
                 },
                 {
                     "name": "ButtonLeft",
-                    "type": "Value",
+                    "type": "Button",
                     "id": "a6e191a5-e322-4d5b-9f7e-3f8018464b5c",
-                    "expectedControlType": "Axis",
-                    "processors": "AxisDeadzone(min=0.5,max=1)",
-                    "interactions": "Hold(duration=0.3,pressPoint=0.2)",
+                    "expectedControlType": "Button",
+                    "processors": "",
+                    "interactions": "Hold(duration=0.3,pressPoint=0.9)",
                     "initialStateCheck": true
                 },
                 {

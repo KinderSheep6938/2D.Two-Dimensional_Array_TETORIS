@@ -15,8 +15,8 @@ public class AccessibleToField : MinoModelGeneration
     #endregion
 
     #region プロパティ
-    public int NowX { get => (int)MyTransform.position.x; }
-    public int NowY { get => (int)MyTransform.position.y; }
+    private int NowX { get => (int)MyTransform.position.x; }
+    private int NowY { get => (int)MyTransform.position.y; }
     #endregion
 
     #region メソッド
