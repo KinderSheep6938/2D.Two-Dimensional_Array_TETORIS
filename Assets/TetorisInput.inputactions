@@ -7,9 +7,9 @@
             "actions": [
                 {
                     "name": "ButtonUp",
-                    "type": "Value",
+                    "type": "Button",
                     "id": "2bd5be1d-0b15-4e53-ad29-cbd3d2324906",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Button",
                     "processors": "AxisDeadzone(min=0.98,max=1)",
                     "interactions": "",
                     "initialStateCheck": true
@@ -25,9 +25,9 @@
                 },
                 {
                     "name": "ButtonDown",
-                    "type": "Value",
+                    "type": "Button",
                     "id": "432251e7-9b25-4170-9f8c-7a62f592b2e4",
-                    "expectedControlType": "Axis",
+                    "expectedControlType": "Button",
                     "processors": "AxisDeadzone(min=0.98,max=1)",
                     "interactions": "",
                     "initialStateCheck": true
